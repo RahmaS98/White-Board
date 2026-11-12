@@ -49,6 +49,9 @@ li .x{border:0;background:none;color:var(--red);font-size:20px;cursor:pointer;pa
 .card button.alt{background:#e3e8ec;color:#222}
 .err{color:var(--red);font-size:13px;min-height:18px;margin-top:6px}
 .out{background:none;border:0;color:var(--muted);text-decoration:underline;font:600 13px Nunito,sans-serif;cursor:pointer}
+.car{font-size:13px;color:var(--muted)}
+.g{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:8px 0}.s{background:#eef3f8;border-radius:10px;padding:8px;text-align:center;font-size:13px;color:#445}.s b{display:block;font:700 30px Caveat,cursive;color:var(--ink)}
+.bars{display:flex;gap:6px;align-items:flex-end;height:100px}.col{flex:1;text-align:center;font-size:11px;color:#445}.bar{background:#dfe5ec;border-radius:4px;display:flex;align-items:flex-end}.bar i{display:block;width:100%;background:var(--ink);border-radius:4px}
 </style>
 </head>
 <body>
@@ -65,8 +68,9 @@ li .x{border:0;background:none;color:var(--red);font-size:20px;cursor:pointer;pa
     <button role="tab" data-p="d" aria-selected="true">Day</button>
     <button role="tab" data-p="w" aria-selected="false">Week</button>
     <button role="tab" data-p="m" aria-selected="false">Month</button>
+    <button role="tab" data-p="s" aria-selected="false">Stats</button>
   </div>
-  <div class="frame"><div class="board">
+  <div class="frame"><div class="board"><div id="main">
     <div class="head">
       <button class="nav" id="prev" aria-label="Previous">‹</button>
       <div class="title" id="title"></div>
@@ -76,38 +80,50 @@ li .x{border:0;background:none;color:var(--red);font-size:20px;cursor:pointer;pa
     <textarea id="note" placeholder="Write here…" aria-label="Notes"></textarea>
     <h2>List</h2>
     <ul id="list"></ul>
-    <div class="add"><input id="new" placeholder="Add an item" aria-label="New list item"><button id="addBtn">Add</button></div>
+    <div class="add"><input id="new" placeholder="Add an item" aria-label="New list item"><button id="addBtn">Add</button></div></div><div id="stats" hidden></div>
   </div></div>
   <div class="tray"></div>
-  <div class="hint"><span id="status" aria-live="polite"></span> <button class="out" id="out">Sign out</button></div>
+  <div class="hint"><span id="status" aria-live="polite"></span> <button class="out" id="out">Sign out</button><br><label class="car"><input type="checkbox" id="carry"> Carry unchecked items to the next day, week or month</label></div>
 </div>
 <script type="module">
 import {createClient} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm";
 const SUPABASE_URL="https://sbhqvqdjhgxkkmvgqobr.supabase.co",SUPABASE_KEY="sb_publishable_2fQr_OIlHNTljIt0B8oebQ_JDXRHAn0";
 const sb=createClient(SUPABASE_URL,SUPABASE_KEY);
 const $=id=>document.getElementById(id);
-let P='d',off=0,uid=null,chan=null,timer=null;const cache={};let dirty=[];
-const pad=n=>n<10?'0'+n:''+n;
+let P='d',off=0,uid=null,chan=null,timer=null,dirty=[];const cache={};
 const ls=(k,v)=>{try{if(v===undefined)return JSON.parse(localStorage.getItem(k)||'null');localStorage.setItem(k,JSON.stringify(v))}catch(e){return null}};
-function base(){const d=new Date();d.setHours(12,0,0,0);
-  if(P==='d')d.setDate(d.getDate()+off);
-  if(P==='w'){const k=(d.getDay()+6)%7;d.setDate(d.getDate()-k+off*7)}
-  if(P==='m'){d.setDate(1);d.setMonth(d.getMonth()+off)}
+let carry=ls('wb-carry')!==false;
+const pad=n=>n<10?'0'+n:''+n;
+function base(p,o){const d=new Date();d.setHours(12,0,0,0);
+  if(p==='d')d.setDate(d.getDate()+o);
+  if(p==='w'){const k=(d.getDay()+6)%7;d.setDate(d.getDate()-k+o*7)}
+  if(p==='m'){d.setDate(1);d.setMonth(d.getMonth()+o)}
   return d}
-function key(){const d=base();return P+'-'+d.getFullYear()+'-'+pad(d.getMonth()+1)+(P==='m'?'':'-'+pad(d.getDate()))}
-function label(){const d=base();
+const keyOf=(p,o)=>{const d=base(p,o);return p+'-'+d.getFullYear()+'-'+pad(d.getMonth()+1)+(p==='m'?'':'-'+pad(d.getDate()))};
+const key=()=>keyOf(P,off);
+function label(){const d=base(P,off);
   if(P==='d'){const o=d.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});return off===0?'Today · '+o:o}
   if(P==='w'){const e=new Date(d);e.setDate(e.getDate()+6);const f={month:'short',day:'numeric'};return 'Week of '+d.toLocaleDateString(undefined,f)+' – '+e.toLocaleDateString(undefined,f)}
   return d.toLocaleDateString(undefined,{month:'long',year:'numeric'})}
+const norm=d=>({n:(d&&d.n)||'',i:Array.isArray(d&&d.i)?d.i:[]});
 const cur=()=>cache[key()]||(cache[key()]=(uid&&ls('wb-'+uid+'-'+key()))||{n:'',i:[]});
 const say=t=>$('status').textContent=t;
+let PR=null;function pref(){try{if(!PR&&window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())PR=window.Capacitor.registerPlugin('WidgetBridge')}catch(e){}return PR}
+function widget(){const p=pref();if(!p||!uid)return;
+  const k=keyOf('d',0),c=cache[k]||ls('wb-'+uid+'-'+k)||{n:'',i:[]};
+  const open=c.i.filter(x=>!x.d),done=c.i.length-open.length;
+  let b=open.slice(0,8).map(x=>'☐ '+x.t).join('\n');
+  if(open.length>8)b+='\n+'+(open.length-8)+' more';
+  if(done)b+=(b?'\n':'')+'✓ '+done+' done';
+  if(c.n)b+=(b?'\n\n':'')+c.n.split('\n')[0].slice(0,80);
+  try{p.setData({title:base('d',0).toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'}),body:b||'Nothing yet. Tap to add.'}).then(()=>{$('status').textContent='Synced across your devices · widget updated'},e=>{$('status').textContent='Widget error: '+((e&&e.message)||e)})}catch(e){$('status').textContent='Widget error: '+e}}
 async function push(k){
   const {error}=await sb.from('boards').upsert({user_id:uid,key:k,data:cache[k]},{onConflict:'user_id,key'});
   if(error){if(!dirty.includes(k))dirty.push(k);ls('wb-dirty-'+uid,dirty);say('Offline. Will sync when connected.')}
   else{dirty=dirty.filter(x=>x!==k);ls('wb-dirty-'+uid,dirty);say('Synced across your devices')}
 }
-function persist(){if(!uid)return;const k=key();ls('wb-'+uid+'-'+k,cache[k]);push(k)}
-async function flush(){for(const k of [...dirty])if(cache[k]||ls('wb-'+uid+'-'+k)){cache[k]=cache[k]||ls('wb-'+uid+'-'+k);await push(k)}}
+function persist(){if(!uid)return;const k=key();ls('wb-'+uid+'-'+k,cache[k]);push(k);widget()}
+async function flush(){for(const k of [...dirty]){cache[k]=cache[k]||ls('wb-'+uid+'-'+k);if(cache[k])await push(k)}}
 function render(){
   const c=cur(),ul=$('list'),note=$('note');
   $('title').textContent=label();
@@ -117,32 +133,58 @@ function render(){
     const li=document.createElement('li');if(it.d)li.className='done';
     const cb=document.createElement('input');cb.type='checkbox';cb.checked=!!it.d;cb.setAttribute('aria-label','Mark done');
     cb.onchange=()=>{it.d=cb.checked;persist();render()};
-    const s=document.createElement('span');s.textContent=it.t;
+    const s=document.createElement('span');s.textContent=(it.r?'↻ ':'')+it.t;
     const x=document.createElement('button');x.className='x';x.textContent='✕';x.setAttribute('aria-label','Delete item');
     x.onclick=()=>{c.i.splice(idx,1);persist();render()};
     li.append(cb,s,x);ul.appendChild(li)});
 }
+async function carryOver(k){
+  const ks=[];for(let i=1;i<=(P==='d'?7:P==='w'?4:3);i++)ks.push(keyOf(P,off-i));
+  const {data}=await sb.from('boards').select('key,data').in('key',ks);if(!data)return;
+  for(const kk of ks){const r=data.find(x=>x.key===kk);if(r){
+    const items=norm(r.data).i.filter(x=>!x.d).map(x=>({t:x.t,d:false,r:1}));
+    if(items.length&&!cur().i.length)cache[k].i=items;break}}
+}
 async function load(){
+  if(P==='s')return showStats();
   const k=key();render();if(!uid)return;
   const {data,error}=await sb.from('boards').select('data').eq('key',k).maybeSingle();
-  if(error){say('Offline. Showing saved copy');return}
-  if(data&&!dirty.includes(k)){const d=data.data||{};cache[k]={n:d.n||'',i:Array.isArray(d.i)?d.i:[]};ls('wb-'+uid+'-'+k,cache[k])}
-  say('Synced across your devices');if(k===key())render();
+  if(error){say('Offline. Showing saved copy');widget();return}
+  if(data&&!dirty.includes(k)){cache[k]=norm(data.data);ls('wb-'+uid+'-'+k,cache[k])}
+  else if(!data&&!ls('wb-'+uid+'-'+k)&&carry&&off>=0)await carryOver(k);
+  say('Synced across your devices');if(k===key())render();widget();
+}
+async function showStats(){
+  $('main').hidden=true;$('stats').hidden=false;$('title').textContent='Statistics';
+  const all={},pre='wb-'+uid+'-';
+  if(uid){const {data}=await sb.from('boards').select('key,data');(data||[]).forEach(r=>all[r.key]=norm(r.data))}
+  Object.keys(localStorage).forEach(k=>{if(k.startsWith(pre)){const kk=k.slice(pre.length);if(!all[kk])all[kk]=norm(ls(k))}});
+  const by={d:{t:0,c:0},w:{t:0,c:0},m:{t:0,c:0}},wd=[0,0,0,0,0,0,0],days={};let T=0,C=0;
+  Object.keys(all).forEach(k=>{const p=k[0],it=all[k].i,c=it.filter(x=>x.d).length;
+    if(by[p]){by[p].t+=it.length;by[p].c+=c;T+=it.length;C+=c}
+    if(p==='d'){days[k.slice(2)]=[c,it.length];wd[new Date(k.slice(2)+'T12:00:00').getDay()]+=c}});
+  const ds=o=>keyOf('d',o).slice(2),pc=a=>a.t?Math.round(100*a.c/a.t)+'%':'—';
+  let st=0,o=days[ds(0)]&&days[ds(0)][0]>0?0:-1;while(days[ds(o)]&&days[ds(o)][0]>0){st++;o--}
+  const N=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],mx=Math.max(...wd);
+  let max=1;const cols=[];for(let i=6;i>=0;i--){const v=days[ds(-i)]||[0,0];max=Math.max(max,v[1]);cols.push([v,base('d',-i).toLocaleDateString(undefined,{weekday:'short'})])}
+  const bars=cols.map(([v,n])=>'<div class="col">'+v[0]+'/'+v[1]+'<div class="bar" style="height:'+Math.max(6,Math.round(v[1]/max*70))+'px"><i style="height:'+(v[1]?Math.round(100*v[0]/v[1]):0)+'%"></i></div>'+n+'</div>').join('');
+  $('stats').innerHTML='<h2>Last 7 days (done / total)</h2><div class="bars">'+bars+'</div><div class="g"><div class="s"><b>'+st+'</b>day streak</div><div class="s"><b>'+C+'/'+T+'</b>items done</div><div class="s"><b>'+pc(by.d)+'</b>days</div><div class="s"><b>'+pc(by.w)+'</b>weeks</div><div class="s"><b>'+pc(by.m)+'</b>months</div><div class="s"><b>'+(mx?N[wd.indexOf(mx)].slice(0,3):'—')+'</b>best day</div></div>';
 }
 function live(){
   if(chan)sb.removeChannel(chan);
   chan=sb.channel('boards-'+uid).on('postgres_changes',{event:'*',schema:'public',table:'boards',filter:'user_id=eq.'+uid},p=>{
     const r=p.new;if(!r||!r.key||dirty.includes(r.key))return;
-    const d=r.data||{};cache[r.key]={n:d.n||'',i:Array.isArray(d.i)?d.i:[]};ls('wb-'+uid+'-'+r.key,cache[r.key]);
-    if(r.key===key())render()}).subscribe();
+    cache[r.key]=norm(r.data);ls('wb-'+uid+'-'+r.key,cache[r.key]);
+    if(r.key===key()&&P!=='s')render();widget()}).subscribe();
 }
-const go=()=>load();
+const go=()=>{$('main').hidden=false;$('stats').hidden=true;load()};
 $('note').addEventListener('input',e=>{cur().n=e.target.value;clearTimeout(timer);timer=setTimeout(persist,600)});
 function add(){const t=$('new').value.trim();if(!t)return;cur().i.push({t,d:false});$('new').value='';persist();render();$('new').focus()}
 $('addBtn').onclick=add;
 $('new').addEventListener('keydown',e=>{if(e.key==='Enter')add()});
 $('prev').onclick=()=>{off--;go()};$('next').onclick=()=>{off++;go()};$('title').onclick=()=>{off=0;go()};
-document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{P=b.dataset.p;off=0;document.querySelectorAll('#tabs button').forEach(o=>o.setAttribute('aria-selected',o===b));go()});
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{P=b.dataset.p;off=0;document.querySelectorAll('#tabs button').forEach(o=>o.setAttribute('aria-selected',o===b));$('prev').style.visibility=$('next').style.visibility=P==='s'?'hidden':'visible';go()});
+$('carry').checked=carry;$('carry').onchange=e=>{carry=e.target.checked;ls('wb-carry',carry)};
 async function authGo(fn){$('err').textContent='';
   const {data,error}=await fn({email:$('em').value.trim(),password:$('pw').value});
   if(error){const m=error.message||'';$('err').textContent=/invalid login/i.test(m)?'Wrong email or password.':/already/i.test(m)?'That email already has an account. Tap Sign in.':/password/i.test(m)?'Use at least 6 characters.':/confirm/i.test(m)?'Check your email to confirm, or turn off Confirm email in Supabase.':'Could not sign in. Check your connection.'}
