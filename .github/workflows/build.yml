@@ -19,7 +19,7 @@ jobs:
         run: |
           mkdir www && cp index.html www/
           echo '{"name":"whiteboard","version":"1.0.0"}' > package.json
-          npm i @capacitor/core@6.1.2 @capacitor/cli@6.1.2 @capacitor/android@6.1.2 @capacitor/preferences@6.0.2
+          npm i @capacitor/core@6.1.2 @capacitor/cli@6.1.2 @capacitor/android@6.1.2
           echo '{"appId":"com.rahma.whiteboard","appName":"Whiteboard","webDir":"www"}' > capacitor.config.json
           npx cap add android
           npx cap sync android
@@ -42,7 +42,7 @@ jobs:
               for (int id : ids) update(c, m, id);
             }
             static void update(Context c, AppWidgetManager m, int id) {
-              SharedPreferences p = c.getSharedPreferences("CapacitorStorage", Context.MODE_PRIVATE);
+              SharedPreferences p = c.getSharedPreferences("WbWidget", Context.MODE_PRIVATE);
               RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget);
               v.setTextViewText(R.id.wtitle, p.getString("wb_title", "Whiteboard"));
               v.setTextViewText(R.id.wbody, p.getString("wb_body", "Open the app once to load your list."));
@@ -57,10 +57,37 @@ jobs:
             }
           }
           JAVA
+          cat > $J/WidgetBridge.java <<'JAVA'
+          package com.rahma.whiteboard;
+          import android.content.Context;
+          import android.content.SharedPreferences;
+          import com.getcapacitor.Plugin;
+          import com.getcapacitor.PluginCall;
+          import com.getcapacitor.PluginMethod;
+          import com.getcapacitor.annotation.CapacitorPlugin;
+          @CapacitorPlugin(name = "WidgetBridge")
+          public class WidgetBridge extends Plugin {
+            @PluginMethod
+            public void setData(PluginCall call) {
+              String t = call.getString("title", "Whiteboard");
+              String b = call.getString("body", "");
+              SharedPreferences p = getContext().getSharedPreferences("WbWidget", Context.MODE_PRIVATE);
+              p.edit().putString("wb_title", t).putString("wb_body", b).apply();
+              WhiteboardWidget.refreshAll(getContext());
+              call.resolve();
+            }
+          }
+          JAVA
           cat > $J/MainActivity.java <<'JAVA'
           package com.rahma.whiteboard;
+          import android.os.Bundle;
           import com.getcapacitor.BridgeActivity;
           public class MainActivity extends BridgeActivity {
+            @Override
+            public void onCreate(Bundle savedInstanceState) {
+              registerPlugin(WidgetBridge.class);
+              super.onCreate(savedInstanceState);
+            }
             @Override
             public void onPause() {
               super.onPause();
@@ -104,5 +131,3 @@ jobs:
         with:
           name: whiteboard-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
-
-          
