@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Whiteboard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Nunito:wght@600;800&display=swap">
+<style>
+:root{--bg:#d9dde2;--frame:#b8bec6;--frame2:#8e959e;--board:#fbfcfc;--ink:#1f3a8a;--red:#c0392b;--grid:#e3e8ec;--text:#2b3138;--muted:#6b747e;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1b1e22;--frame:#555c65;--frame2:#3a4046;--text:#e6e9ec;--muted:#9aa3ad}}
+:root[data-theme="dark"]{--bg:#1b1e22;--frame:#555c65;--frame2:#3a4046;--text:#e6e9ec;--muted:#9aa3ad}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Nunito,system-ui,sans-serif;min-height:100vh;padding:14px}
+.wrap{max-width:560px;margin:0 auto}
+.tabs{display:flex;gap:8px;margin-bottom:12px}
+.tabs button{flex:1;font:800 15px Nunito,system-ui,sans-serif;padding:10px;border:0;border-radius:10px;background:var(--frame);color:var(--text);cursor:pointer}
+.tabs button[aria-selected=true]{background:var(--ink);color:#fff}
+button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px solid var(--red);outline-offset:2px}
+.frame{background:linear-gradient(145deg,var(--frame),var(--frame2));padding:12px;border-radius:14px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.board{background:var(--board);border-radius:6px;padding:14px 16px 18px;color:#222;background-image:linear-gradient(var(--grid) 1px,transparent 1px);background-size:100% 32px;box-shadow:inset 0 1px 4px rgba(0,0,0,.18)}
+.head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.title{font:700 28px Caveat,cursive;color:var(--red);text-align:center;flex:1;line-height:1.1}
+.nav{width:40px;height:40px;border:0;border-radius:50%;background:#eef1f3;font-size:20px;color:#333;cursor:pointer}
+h2{font:700 22px Caveat,cursive;color:var(--ink);margin:10px 0 2px}
+textarea{width:100%;min-height:120px;border:0;background:transparent;resize:vertical;font:500 22px/32px Caveat,cursive;color:var(--ink);padding:0}
+ul{list-style:none;margin:0;padding:0}
+li{display:flex;align-items:center;gap:10px;min-height:32px}
+li input[type=checkbox]{width:20px;height:20px;accent-color:var(--ink)}
+li span{flex:1;font:500 22px/32px Caveat,cursive;color:var(--ink)}
+li.done span{text-decoration:line-through;color:#8a94a6}
+li .x{border:0;background:none;color:var(--red);font-size:20px;cursor:pointer;padding:4px 8px}
+.add{display:flex;gap:8px;margin-top:6px}
+.add input{flex:1;border:0;border-bottom:2px dashed var(--ink);background:transparent;font:500 22px Caveat,cursive;color:var(--ink);padding:2px 0}
+.add button{border:0;border-radius:8px;background:var(--ink);color:#fff;font:800 14px Nunito,sans-serif;padding:0 14px;cursor:pointer}
+.tray{height:10px;margin:0 20%;background:var(--frame2);border-radius:0 0 8px 8px}
+.hint{text-align:center;color:var(--muted);font-size:13px;margin-top:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tabs" role="tablist" id="tabs">
+    <button role="tab" data-p="d" aria-selected="true">Day</button>
+    <button role="tab" data-p="w" aria-selected="false">Week</button>
+    <button role="tab" data-p="m" aria-selected="false">Month</button>
+  </div>
+  <div class="frame"><div class="board">
+    <div class="head">
+      <button class="nav" id="prev" aria-label="Previous">‹</button>
+      <div class="title" id="title"></div>
+      <button class="nav" id="next" aria-label="Next">›</button>
+    </div>
+    <h2>Notes</h2>
+    <textarea id="note" placeholder="Write here…" aria-label="Notes"></textarea>
+    <h2>List</h2>
+    <ul id="list"></ul>
+    <div class="add"><input id="new" placeholder="Add an item" aria-label="New list item"><button id="addBtn">Add</button></div>
+  </div></div>
+  <div class="tray"></div>
+  <div class="hint" id="status" aria-live="polite"></div>
+</div>
+<script>
+(function(){
+var P='d',off=0,cache={},db=null,uid=null,unsub=null,subKey=null,timer=null,loadT=null;
+var local={};try{local=JSON.parse(localStorage.getItem('wb')||'{}')||{}}catch(e){local={}}
+var statusEl=document.getElementById('status');
+function setStatus(t){statusEl.textContent=t}
+function pad(n){return n<10?'0'+n:''+n}
+function base(){var d=new Date();d.setHours(12,0,0,0);
+  if(P==='d')d.setDate(d.getDate()+off);
+  if(P==='w'){var k=(d.getDay()+6)%7;d.setDate(d.getDate()-k+off*7)}
+  if(P==='m'){d.setDate(1);d.setMonth(d.getMonth()+off)}
+  return d}
+function key(){var d=base();return P+'-'+d.getFullYear()+'-'+pad(d.getMonth()+1)+(P==='m'?'':'-'+pad(d.getDate()))}
+function label(){var d=base(),o;
+  if(P==='d'){o=d.toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'});return off===0?'Today · '+o:o}
+  if(P==='w'){var e=new Date(d);e.setDate(e.getDate()+6);var f={month:'short',day:'numeric'};return 'Week of '+d.toLocaleDateString(undefined,f)+' – '+e.toLocaleDateString(undefined,f)}
+  return d.toLocaleDateString(undefined,{month:'long',year:'numeric'})}
+function cur(){var k=key();if(!cache[k])cache[k]=local[k]||{n:'',i:[]};return cache[k]}
+function persist(){
+  var k=key(),c=cur();
+  try{local[k]=c;localStorage.setItem('wb',JSON.stringify(local))}catch(e){}
+  if(db&&uid){db.doc('data/users/'+uid+'/boards/'+k).set({n:c.n,i:c.i}).then(function(){setStatus('Synced across your devices')},function(){setStatus('Couldn’t sync. Saved on this device.')})}
+}
+function render(){
+  var c=cur(),ul=document.getElementById('list'),note=document.getElementById('note');
+  document.getElementById('title').textContent=label();
+  if(document.activeElement!==note&&note.value!==c.n)note.value=c.n;
+  ul.innerHTML='';
+  c.i.forEach(function(it,idx){
+    var li=document.createElement('li');if(it.d)li.className='done';
+    var cb=document.createElement('input');cb.type='checkbox';cb.checked=!!it.d;cb.setAttribute('aria-label','Mark done');
+    cb.onchange=function(){it.d=cb.checked;persist();render()};
+    var s=document.createElement('span');s.textContent=it.t;
+    var x=document.createElement('button');x.className='x';x.textContent='✕';x.setAttribute('aria-label','Delete item');
+    x.onclick=function(){c.i.splice(idx,1);persist();render()};
+    li.appendChild(cb);li.appendChild(s);li.appendChild(x);ul.appendChild(li)});
+}
+function subscribe(){
+  var k=key();if(!db||!uid||subKey===k)return;
+  if(unsub){unsub();unsub=null}
+  subKey=k;clearTimeout(loadT);
+  loadT=setTimeout(function(){setStatus('Can’t reach sync yet. Showing what’s on this device.')},10000);
+  unsub=db.doc('data/users/'+uid+'/boards/'+k).onSnapshot(function(snap){
+    if(snap.metadata&&snap.metadata.hasPendingWrites)return;
+    clearTimeout(loadT);
+    if(snap.exists){var d=snap.data()||{};cache[k]={n:d.n||'',i:Array.isArray(d.i)?d.i:[]}}
+    else if(!cache[k])cache[k]=local[k]||{n:'',i:[]};
+    setStatus('Synced across your devices');
+    if(k===key())render();
+  },function(){setStatus('Couldn’t sync. Saved on this device.')});
+}
+function go(){render();subscribe()}
+document.getElementById('note').addEventListener('input',function(e){cur().n=e.target.value;clearTimeout(timer);timer=setTimeout(persist,600)});
+function add(){var inp=document.getElementById('new'),t=inp.value.trim();if(!t)return;cur().i.push({t:t,d:false});inp.value='';persist();render();inp.focus()}
+document.getElementById('addBtn').onclick=add;
+document.getElementById('new').addEventListener('keydown',function(e){if(e.key==='Enter')add()});
+document.getElementById('prev').onclick=function(){off--;go()};
+document.getElementById('next').onclick=function(){off++;go()};
+document.getElementById('title').onclick=function(){off=0;go()};
+document.querySelectorAll('#tabs button').forEach(function(b){b.onclick=function(){
+  P=b.dataset.p;off=0;document.querySelectorAll('#tabs button').forEach(function(o){o.setAttribute('aria-selected',o===b)});go()}});
+setStatus('Saved on this device only');
+render();
+(async function(){
+  try{
+    var u=await claude.use('user'),d=await claude.use('db');
+    if(!u||!d)return;
+    var id=await u.id();if(!id)return;
+    db=d;uid=id;subscribe();
+  }catch(e){}
+})();
+})();
+</script>
+</body>
+</html>
