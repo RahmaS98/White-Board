@@ -19,12 +19,90 @@ jobs:
         run: |
           mkdir www && cp index.html www/
           echo '{"name":"whiteboard","version":"1.0.0"}' > package.json
-          npm i @capacitor/core@6.1.2 @capacitor/cli@6.1.2 @capacitor/android@6.1.2
+          npm i @capacitor/core@6.1.2 @capacitor/cli@6.1.2 @capacitor/android@6.1.2 @capacitor/preferences@6.0.2
           echo '{"appId":"com.rahma.whiteboard","appName":"Whiteboard","webDir":"www"}' > capacitor.config.json
           npx cap add android
           npx cap sync android
+          A=android/app/src/main
+          J=$A/java/com/rahma/whiteboard
+          mkdir -p $A/res/xml $A/res/layout $A/res/drawable
+          cat > $J/WhiteboardWidget.java <<'JAVA'
+          package com.rahma.whiteboard;
+          import android.app.PendingIntent;
+          import android.appwidget.AppWidgetManager;
+          import android.appwidget.AppWidgetProvider;
+          import android.content.ComponentName;
+          import android.content.Context;
+          import android.content.Intent;
+          import android.content.SharedPreferences;
+          import android.widget.RemoteViews;
+          public class WhiteboardWidget extends AppWidgetProvider {
+            @Override
+            public void onUpdate(Context c, AppWidgetManager m, int[] ids) {
+              for (int id : ids) update(c, m, id);
+            }
+            static void update(Context c, AppWidgetManager m, int id) {
+              SharedPreferences p = c.getSharedPreferences("CapacitorStorage", Context.MODE_PRIVATE);
+              RemoteViews v = new RemoteViews(c.getPackageName(), R.layout.widget);
+              v.setTextViewText(R.id.wtitle, p.getString("wb_title", "Whiteboard"));
+              v.setTextViewText(R.id.wbody, p.getString("wb_body", "Open the app once to load your list."));
+              Intent i = new Intent(c, MainActivity.class);
+              PendingIntent pi = PendingIntent.getActivity(c, 0, i, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+              v.setOnClickPendingIntent(R.id.wroot, pi);
+              m.updateAppWidget(id, v);
+            }
+            static void refreshAll(Context c) {
+              AppWidgetManager m = AppWidgetManager.getInstance(c);
+              for (int id : m.getAppWidgetIds(new ComponentName(c, WhiteboardWidget.class))) update(c, m, id);
+            }
+          }
+          JAVA
+          cat > $J/MainActivity.java <<'JAVA'
+          package com.rahma.whiteboard;
+          import com.getcapacitor.BridgeActivity;
+          public class MainActivity extends BridgeActivity {
+            @Override
+            public void onPause() {
+              super.onPause();
+              WhiteboardWidget.refreshAll(this);
+            }
+          }
+          JAVA
+          cat > $A/res/layout/widget.xml <<'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/wroot" android:layout_width="match_parent" android:layout_height="match_parent"
+            android:orientation="vertical" android:padding="12dp" android:background="@drawable/widget_bg">
+            <TextView android:id="@+id/wtitle" android:layout_width="match_parent" android:layout_height="wrap_content"
+              android:textColor="#C0392B" android:textStyle="bold" android:textSize="16sp" android:maxLines="1"/>
+            <TextView android:id="@+id/wbody" android:layout_width="match_parent" android:layout_height="wrap_content"
+              android:layout_marginTop="6dp" android:textColor="#1F3A8A" android:textSize="14sp" android:ellipsize="end"/>
+          </LinearLayout>
+          XML
+          cat > $A/res/drawable/widget_bg.xml <<'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+            <solid android:color="#FBFCFC"/>
+            <corners android:radius="16dp"/>
+            <stroke android:width="3dp" android:color="#B8BEC6"/>
+          </shape>
+          XML
+          cat > $A/res/xml/widget_info.xml <<'XML'
+          <?xml version="1.0" encoding="utf-8"?>
+          <appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+            android:minWidth="250dp" android:minHeight="180dp" android:updatePeriodMillis="1800000"
+            android:initialLayout="@layout/widget" android:resizeMode="horizontal|vertical" android:widgetCategory="home_screen"/>
+          XML
+          python3 - <<'PY'
+          f='android/app/src/main/AndroidManifest.xml'
+          s=open(f).read()
+          r='<receiver android:name=".WhiteboardWidget" android:exported="true"><intent-filter><action android:name="android.appwidget.action.APPWIDGET_UPDATE"/></intent-filter><meta-data android:name="android.appwidget.provider" android:resource="@xml/widget_info"/></receiver>'
+          open(f,'w').write(s.replace('</application>',r+'</application>'))
+          PY
           cd android && chmod +x gradlew && ./gradlew assembleDebug
       - uses: actions/upload-artifact@v4
         with:
           name: whiteboard-apk
           path: android/app/build/outputs/apk/debug/app-debug.apk
+
+          
