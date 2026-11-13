@@ -83,7 +83,7 @@ li .x{border:0;background:none;color:var(--red);font-size:20px;cursor:pointer;pa
     <div class="add"><input id="new" placeholder="Add an item" aria-label="New list item"><button id="addBtn">Add</button></div></div><div id="stats" hidden></div>
   </div></div>
   <div class="tray"></div>
-  <div class="hint"><span id="status" aria-live="polite"></span> <button class="out" id="out">Sign out</button><br><label class="car"><input type="checkbox" id="carry"> Carry unchecked items to the next day, week or month</label></div>
+  <div class="hint"><span id="status" aria-live="polite"></span><span id="ws"></span> <button class="out" id="out">Sign out</button><br><label class="car"><input type="checkbox" id="carry"> Carry unchecked items to the next day, week or month</label></div>
 </div>
 <script type="module">
 import {createClient} from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/+esm";
@@ -108,15 +108,17 @@ function label(){const d=base(P,off);
 const norm=d=>({n:(d&&d.n)||'',i:Array.isArray(d&&d.i)?d.i:[]});
 const cur=()=>cache[key()]||(cache[key()]=(uid&&ls('wb-'+uid+'-'+key()))||{n:'',i:[]});
 const say=t=>$('status').textContent=t;
-let PR=null;function pref(){try{if(!PR&&window.Capacitor&&window.Capacitor.isNativePlatform&&window.Capacitor.isNativePlatform())PR=window.Capacitor.registerPlugin('WidgetBridge')}catch(e){}return PR}
-function widget(){const p=pref();if(!p||!uid)return;
+let PR=null;const ws=t=>{$('ws').textContent=' · v3 '+t};
+function pref(){if(PR)return PR;const C=window.Capacitor;if(!C)return null;try{PR=(C.Plugins&&C.Plugins.WidgetBridge)||(C.registerPlugin&&C.registerPlugin('WidgetBridge'))}catch(e){ws('bridge error: '+e)}return PR}
+function widget(){if(!uid)return;const p=pref();if(!p){ws('no app bridge (use the APK)');return}
   const k=keyOf('d',0),c=cache[k]||ls('wb-'+uid+'-'+k)||{n:'',i:[]};
   const open=c.i.filter(x=>!x.d),done=c.i.length-open.length;
   let b=open.slice(0,8).map(x=>'☐ '+x.t).join('\n');
   if(open.length>8)b+='\n+'+(open.length-8)+' more';
   if(done)b+=(b?'\n':'')+'✓ '+done+' done';
   if(c.n)b+=(b?'\n\n':'')+c.n.split('\n')[0].slice(0,80);
-  try{p.setData({title:base('d',0).toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'}),body:b||'Nothing yet. Tap to add.'}).then(()=>{$('status').textContent='Synced across your devices · widget updated'},e=>{$('status').textContent='Widget error: '+((e&&e.message)||e)})}catch(e){$('status').textContent='Widget error: '+e}}
+  ws('sending to widget…');
+  try{p.setData({title:base('d',0).toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'}),body:b||'Nothing yet. Tap to add.'}).then(()=>ws('widget updated'),e=>ws('widget error: '+((e&&e.message)||e)))}catch(e){ws('widget error: '+e)}}
 async function push(k){
   const {error}=await sb.from('boards').upsert({user_id:uid,key:k,data:cache[k]},{onConflict:'user_id,key'});
   if(error){if(!dirty.includes(k))dirty.push(k);ls('wb-dirty-'+uid,dirty);say('Offline. Will sync when connected.')}
