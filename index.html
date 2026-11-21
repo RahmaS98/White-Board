@@ -66,6 +66,8 @@ li{display:block}.row{display:flex;align-items:center;gap:6px;min-height:32px}
 .tb{position:absolute;border-radius:6px;padding:3px 18px 3px 6px;font:700 13px Nunito,sans-serif;overflow:hidden;cursor:pointer;border:1px solid rgba(0,0,0,.15)}.tb small{display:block;font-weight:600;font-size:11px}.tb.dn{opacity:.5;text-decoration:line-through}.tb button{position:absolute;right:2px;top:0;border:0;background:none;font-size:14px;color:inherit;cursor:pointer}
 .pg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}.pc{border:1.5px solid var(--frame2);border-radius:8px;padding:0 8px 8px;background:#fff}.pc.today{border-color:var(--red);border-width:2.5px}.ph{background:var(--frame);margin:0 -8px 4px;padding:3px 8px;font:800 14px Nunito,sans-serif;color:#333}.pc h3{font:700 16px Caveat,cursive;color:var(--ink);margin:4px 0 0}.pc .row{min-height:26px}.pc .tx{font:500 18px Caveat,cursive;flex:1;color:var(--ink)}.pc .done .tx{text-decoration:line-through;color:#8a94a6}.pc input.ai{width:100%;border:0;border-bottom:1px dashed var(--ink);background:transparent;font:500 17px Caveat,cursive;color:var(--ink);margin-bottom:2px}.pc textarea{min-height:70px;font:500 18px/24px Caveat,cursive}
 .wd{display:flex;gap:2px;flex-wrap:wrap}.wd button{border:0;background:none;font-size:18px;padding:2px;cursor:pointer;opacity:.25}.wd button.on{opacity:1}
+.tabs{gap:4px}.tabs button{font-size:13px;padding:9px 2px}
+.tf label{display:flex;align-items:center;gap:3px;font-size:13px;color:#445}.tf label input{min-width:0;flex:none}
 </style>
 </head>
 <body>
@@ -82,6 +84,8 @@ li{display:block}.row{display:flex;align-items:center;gap:6px;min-height:32px}
     <button role="tab" data-p="d" aria-selected="true">Day</button>
     <button role="tab" data-p="w" aria-selected="false">Week</button>
     <button role="tab" data-p="m" aria-selected="false">Month</button>
+    <button role="tab" data-p="q" aria-selected="false">Quran</button>
+    <button role="tab" data-p="c" aria-selected="false">Code</button>
     <button role="tab" data-p="s" aria-selected="false">Stats</button>
   </div>
   <div class="frame"><div class="board"><div id="main">
@@ -94,7 +98,7 @@ li{display:block}.row{display:flex;align-items:center;gap:6px;min-height:32px}
     <textarea id="note" placeholder="Write here…" aria-label="Notes"></textarea>
     <h2>List</h2>
     <ul id="list"></ul>
-    <div class="add"><input id="new" placeholder="Add an item" aria-label="New list item"><button id="addBtn">Add</button></div></div><div id="tv" hidden><div class="tf"><input type="time" id="ts" value="08:00" aria-label="Start"><input type="time" id="te" value="09:00" aria-label="End"><input id="tt" placeholder="Block title" aria-label="Block title"><select id="tc" aria-label="Color"><option value="0">Blue</option><option value="1">Green</option><option value="2">Amber</option><option value="3">Coral</option><option value="4">Purple</option></select><button id="tbtn">Add</button></div><div id="terr" style="color:var(--red);font-size:13px"></div><div id="tl"></div></div><div id="pv" hidden></div></div><div id="stats" hidden></div>
+    <div class="add"><input id="new" placeholder="Add an item" aria-label="New list item"><button id="addBtn">Add</button></div></div><div id="tv" hidden><details id="sdet" style="margin:6px 0"><summary style="font:700 15px Nunito,sans-serif;cursor:pointer">Weekly schedule (repeats every week)</summary><div id="sdd" class="tf"><label><input type="checkbox">Sun</label><label><input type="checkbox">Mon</label><label><input type="checkbox">Tue</label><label><input type="checkbox">Wed</label><label><input type="checkbox">Thu</label><label><input type="checkbox">Fri</label><label><input type="checkbox">Sat</label></div><div class="tf"><input type="time" id="ss" value="08:00" aria-label="Start"><input type="time" id="se" value="09:00" aria-label="End"><input id="st" placeholder="Session title" aria-label="Session title"><select id="sc2" aria-label="Color"><option value="0">Blue</option><option value="1">Green</option><option value="2">Amber</option><option value="3">Coral</option><option value="4">Purple</option><option value="5">Gray</option></select><input id="sn" placeholder="Note (optional)" aria-label="Note" style="flex:1;min-width:140px"><button id="sbtn">Add to weekly schedule</button></div><div id="serr" style="color:var(--red);font-size:13px"></div><div id="sl"></div><button id="seed" class="ib" hidden>Load my school schedule (example)</button></details><div class="tf"><input type="time" id="ts" value="08:00" aria-label="Start"><input type="time" id="te" value="09:00" aria-label="End"><input id="tt" placeholder="Block title" aria-label="Block title"><select id="tc" aria-label="Color"><option value="0">Blue</option><option value="1">Green</option><option value="2">Amber</option><option value="3">Coral</option><option value="4">Purple</option><option value="5">Gray</option></select><button id="tbtn">Add</button></div><div id="terr" style="color:var(--red);font-size:13px"></div><div id="tl"></div></div><div id="pv" hidden></div></div><div id="stats" hidden></div><div id="qv" hidden><h2>Quran heart</h2><select id="qs" aria-label="Surah" style="width:100%;font:600 15px Nunito,sans-serif;padding:6px;border:1px solid #c5ccd3;border-radius:8px;background:#fff;color:#222"></select><svg id="qsvg" viewBox="0 0 340 300" width="100%" role="img"><title>Heart made of 114 surahs</title><defs><clipPath id="qc"><path id="qh" d="M170 282 C45 195 12 120 45 68 C78 20 142 30 170 80 C198 30 262 20 295 68 C328 120 295 195 170 282 Z"/></clipPath></defs><g id="qcells" clip-path="url(#qc)"></g><path d="M170 282 C45 195 12 120 45 68 C78 20 142 30 170 80 C198 30 262 20 295 68 C328 120 295 195 170 282 Z" style="fill:none;stroke:#222;stroke-width:2"/></svg><div id="qp"><div style="display:flex;justify-content:space-between;align-items:baseline"><span id="qn" style="font:700 26px Caveat,cursive;color:var(--red)"></span><span id="qt" style="font-size:13px;color:#445"></span></div><input type="range" id="qr" min="0" step="1" style="width:100%" aria-label="Verses memorized"><div id="qv2" style="font-size:14px"></div><div id="qtot" style="font-size:13px;color:#445;margin-top:6px"></div></div></div><div id="cv" hidden><h2>Programming brain</h2><svg id="bsvg" viewBox="0 0 340 250" width="100%" role="img"><title>Brain divided into programming topics</title><defs><clipPath id="bc"><ellipse cx="170" cy="105" rx="132" ry="80"/></clipPath></defs><g id="lobes" clip-path="url(#bc)"></g><ellipse cx="170" cy="105" rx="132" ry="80" style="fill:none;stroke:#222;stroke-width:2"/><g id="extra"></g><g id="blab"></g></svg><div id="bp"></div></div>
   </div></div>
   <div class="tray"></div>
   <div class="hint"><span id="status" aria-live="polite"></span><span id="ws"></span> <button class="out" id="out">Sign out</button><br><label class="car"><input type="checkbox" id="carry"> Carry unchecked items to the next day, week or month</label></div>
@@ -120,10 +124,10 @@ function label(){const d=base(P,off);
   if(P==='w'){const e=new Date(d);e.setDate(e.getDate()+6);const f={month:'short',day:'numeric'};return 'Week of '+d.toLocaleDateString(undefined,f)+' – '+e.toLocaleDateString(undefined,f)}
   return d.toLocaleDateString(undefined,{month:'long',year:'numeric'})}
 const uid8=()=>Math.random().toString(36).slice(2,9),mk=t=>document.createElement(t);
-const norm=d=>({n:(d&&d.n)||'',m:(d&&d.m)||'list',tb:Array.isArray(d&&d.tb)?d.tb:[],w:(d&&d.w)||0,sc:(d&&d.sc)||{},i:(Array.isArray(d&&d.i)?d.i:[]).map((x,n)=>({...x,id:x.id||'o'+n,s:Array.isArray(x.s)?x.s:[]}))});
+const norm=d=>({q:(d&&d.q)||{},br:Array.isArray(d&&d.br)?d.br:[],sx:Array.isArray(d&&d.sx)?d.sx:[],n:(d&&d.n)||'',m:(d&&d.m)||'list',tb:Array.isArray(d&&d.tb)?d.tb:[],w:(d&&d.w)||0,sc:(d&&d.sc)||{},i:(Array.isArray(d&&d.i)?d.i:[]).map((x,n)=>({...x,id:x.id||'o'+n,s:Array.isArray(x.s)?x.s:[]}))});
 const cur=()=>cache[key()]||(cache[key()]=norm(uid&&ls('wb-'+uid+'-'+key())));
 const say=t=>$('status').textContent=t;
-let PR=null;const ws=t=>{$('ws').textContent=' · v6 '+t};
+let PR=null;const ws=t=>{$('ws').textContent=' · v7 '+t};
 function pref(){if(PR)return PR;const C=window.Capacitor;if(!C)return null;try{PR=(C.Plugins&&C.Plugins.WidgetBridge)||(C.registerPlugin&&C.registerPlugin('WidgetBridge'))}catch(e){ws('bridge error: '+e)}return PR}
 function widget(){if(!uid)return;const p=pref();if(!p){ws('no app bridge (use the APK)');return}
   const k=keyOf('d',0),c=cache[k]||ls('wb-'+uid+'-'+k)||{n:'',i:[]};
@@ -205,14 +209,15 @@ function panelUI(it){if(panel.k==='r')return repUI(it);const d=mk('div');d.class
   const run=()=>{const t=inp.value.trim();if(!t)return;if(panel.k==='s')mut(it.id,x=>{x.s.push({t,d:false});x.d=false});else splitAdd(it.id,sel.value,t)};
   g.onclick=run;inp.onkeydown=e=>{if(e.key==='Enter')run()};d.append(inp,g);return d}
 const MODELS={d:[['list','Normal list'],['time','Time blocks']],w:[['list','Normal list'],['plan','Week planner']],m:[['list','Normal list']]};
-const TC=[['#B5D4F4','#0C447C'],['#C0DD97','#27500A'],['#FAC775','#633806'],['#F5C4B3','#712B13'],['#CECBF6','#3C3489']];
+const TC=[['#B5D4F4','#0C447C'],['#C0DD97','#27500A'],['#FAC775','#633806'],['#F5C4B3','#712B13'],['#CECBF6','#3C3489'],['#E4E2DC','#444441']];
+
 const mins=t=>{const p=t.split(':');return +p[0]*60+(+p[1]||0)};
 const dk=x=>'d-'+x.getFullYear()+'-'+pad(x.getMonth()+1)+'-'+pad(x.getDate());
 function applyModel(c){const opts=MODELS[P]||MODELS.m,sel=$('model');let m=c.m||'list';if(!opts.some(o=>o[0]===m))m='list';
   if(sel.dataset.p!==P){sel.innerHTML='';opts.forEach(o=>{const e=mk('option');e.value=o[0];e.textContent=o[1];sel.append(e)});sel.dataset.p=P}
   sel.value=m;$('mrow').hidden=opts.length<2;$('lv').hidden=m!=='list';$('tv').hidden=m!=='time';$('pv').hidden=m!=='plan';
   $('wrap').classList.toggle('wide',m==='plan');
-  if(m==='time')renderTime(c);if(m==='plan')renderPlan();renderWater(c,m)}
+  if(m==='time'){renderTime(c);renderSched()}if(m==='plan')renderPlan();renderWater(c,m)}
 function renderWater(c,m){const w=$('wt');if(P!=='d'||m==='plan'){w.hidden=true;return}w.hidden=false;w.innerHTML='';
   for(let i=0;i<8;i++){const b=mk('button');b.textContent='💧';b.className=i<(c.w||0)?'on':'';b.setAttribute('aria-label','Water glass '+(i+1));b.onclick=()=>{c.w=c.w===i+1?i:i+1;persist();render()};w.append(b)}}
 function renderTime(c){c.tb=c.tb||[];const tl=$('tl'),H=44,bs=[...c.tb].sort((a,b)=>mins(a.s)-mins(b.s));
@@ -224,8 +229,8 @@ function renderTime(c){c.tb=c.tb||[];const tl=$('tl'),H=44,bs=[...c.tb].sort((a,
     e.style.cssText='top:'+((mins(b.s)/60-h0)*H)+'px;height:'+Math.max(24,(mins(b.e)-mins(b.s))/60*H-2)+'px;background:'+col[0]+';color:'+col[1]+';left:calc(44px + (100% - 44px)*'+(ln[n]/lanes.length)+');width:calc((100% - 44px)/'+lanes.length+' - 3px)';
     const t=mk('span');t.textContent=b.t;const sm=mk('small');sm.textContent=b.s+' – '+b.e;
     const x=mk('button');x.textContent='✕';x.setAttribute('aria-label','Delete block');
-    x.onclick=ev=>{ev.stopPropagation();c.tb=c.tb.filter(y=>y.id!==b.id);persist();render()};
-    e.onclick=()=>{b.d=!b.d;persist();render()};e.append(t,sm,x);tl.append(e)})}
+    x.onclick=ev=>{ev.stopPropagation();if(b.sid)c.sx=(c.sx||[]).concat(b.sid);c.tb=c.tb.filter(y=>y.id!==b.id);persist();render()};
+    e.onclick=()=>{b.d=!b.d;persist();render()};e.title=b.n||b.t;e.append(t,sm,x);if(b.n&&(mins(b.e)-mins(b.s))>=55){const n2=mk('small');n2.textContent=b.n;e.append(n2)}tl.append(e)})}
 async function renderPlan(force){const wk=key(),mon=base('w',off),days=[...Array(7)].map((_,i)=>{const x=new Date(mon);x.setDate(mon.getDate()+i);return x}),ks=days.map(dk);
   const bs=await Promise.all(ks.map(getBoard));if(key()!==wk||P!=='w')return;
   const pv=$('pv'),a=document.activeElement;if(!force&&pv.contains(a)&&(a.tagName==='TEXTAREA'||(a.tagName==='INPUT'&&a.type==='text')))return;
@@ -247,6 +252,60 @@ async function renderPlan(force){const wk=key(),mon=base('w',off),days=[...Array
   [['e','Weekly exercise goals'],['c','Weekly self care goals'],['g','Gratitude']].forEach(([f,nm])=>{const h=mk('h3'),ta=mk('textarea');h.textContent=nm;ta.value=cs.sc[f]||'';ta.setAttribute('aria-label',nm);
     ta.oninput=()=>{cs.sc[f]=ta.value;clearTimeout(timer);timer=setTimeout(persist,600)};sc.append(h,ta)});
   g.append(sc);pv.append(g)}
+const DN=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];let sed=null;
+const SEED=()=>{const a=[{days:[0,1,2,3,4,5,6],s:'05:40',e:'07:34',t:'حفظ القرآن (Quran memorization)',c:4,n:'Right after dawn; test from memory first, tafsir in a separate session'},{days:[6],s:'07:40',e:'09:10',t:'Drawing',c:3,n:''},{days:[0],s:'07:40',e:'09:40',t:"French (L'Aventure)",c:0,n:'Read, then write a short French summary before corrections'},{days:[0],s:'09:45',e:'11:45',t:'Painting',c:3,n:''},{days:[3],s:'07:40',e:'10:40',t:'Math',c:2,n:''},{days:[4],s:'07:40',e:'10:40',t:'Soldering & Circuits',c:3,n:'Turn the iron off and put it in its stand at the end'}];
+  [[1,'Python',0],[2,'Anthropology',1]].forEach(([d,n,c])=>[['07:40','08:50',n+': work 1',c],['08:50','09:05','Break',5],['09:05','10:15',n+': work 2',c],['10:15','10:30','Break',5],['10:30','11:40',n+': work 3',c]].forEach(([s,e,t,k])=>a.push({days:[d],s,e,t,c:k,n:''})));return a};
+async function genSched(k){if(!uid||P!=='d'||off<0)return;const sc=await getBoard('sched'),b=cur(),dow=base('d',off).getDay();b.tb=b.tb||[];let ch=false;
+  b.tb=b.tb.filter(x=>{if(!x.sid)return true;const t=sc.tb.find(y=>y.id===x.sid);
+    if(!t||!t.days.includes(dow)){if(x.d)return true;ch=true;return false}
+    if(x.s!==t.s||x.e!==t.e||x.t!==t.t||x.c!==t.c||x.n!==t.n){x.s=t.s;x.e=t.e;x.t=t.t;x.c=t.c;x.n=t.n;ch=true}return true});
+  sc.tb.forEach(t=>{if(t.days.includes(dow)&&!b.tb.some(x=>x.sid===t.id)&&!(b.sx||[]).includes(t.id)){b.tb.push({id:uid8(),sid:t.id,s:t.s,e:t.e,t:t.t,c:t.c,n:t.n,d:false});ch=true}});
+  if(ch)persist()}
+async function renderSched(){const sc=await getBoard('sched'),L=$('sl');L.innerHTML='';
+  [...sc.tb].sort((a,b)=>Math.min(...a.days)-Math.min(...b.days)||mins(a.s)-mins(b.s)).forEach(t=>{const r=mk('div'),sp=mk('span'),e=mk('button'),x=mk('button');r.className='row';sp.className='tx';sp.style.fontSize='15px';
+    sp.textContent=(t.days.length===7?'Every day':t.days.map(d=>DN[d]).join(' '))+' · '+t.s+'–'+t.e+' · '+t.t;
+    e.className=x.className='ib';e.textContent='✎';x.textContent='✕';e.setAttribute('aria-label','Edit');x.setAttribute('aria-label','Delete');
+    e.onclick=()=>{sed=t.id;$('ss').value=t.s;$('se').value=t.e;$('st').value=t.t;$('sc2').value=t.c;$('sn').value=t.n||'';document.querySelectorAll('#sdd input').forEach((c,i)=>c.checked=t.days.includes(i));$('sbtn').textContent='Save changes'};
+    x.onclick=async()=>{sc.tb=sc.tb.filter(y=>y.id!==t.id);savePush('sched');await genSched(key());render()};
+    r.append(sp,e,x);L.append(r)});$('seed').hidden=sc.tb.length>0}
+const QN='الفاتحة|البقرة|آل عمران|النساء|المائدة|الأنعام|الأعراف|الأنفال|التوبة|يونس|هود|يوسف|الرعد|إبراهيم|الحجر|النحل|الإسراء|الكهف|مريم|طه|الأنبياء|الحج|المؤمنون|النور|الفرقان|الشعراء|النمل|القصص|العنكبوت|الروم|لقمان|السجدة|الأحزاب|سبأ|فاطر|يس|الصافات|ص|الزمر|غافر|فصلت|الشورى|الزخرف|الدخان|الجاثية|الأحقاف|محمد|الفتح|الحجرات|ق|الذاريات|الطور|النجم|القمر|الرحمن|الواقعة|الحديد|المجادلة|الحشر|الممتحنة|الصف|الجمعة|المنافقون|التغابن|الطلاق|التحريم|الملك|القلم|الحاقة|المعارج|نوح|الجن|المزمل|المدثر|القيامة|الإنسان|المرسلات|النبأ|النازعات|عبس|التكوير|الانفطار|المطففين|الانشقاق|البروج|الطارق|الأعلى|الغاشية|الفجر|البلد|الشمس|الليل|الضحى|الشرح|التين|العلق|القدر|البينة|الزلزلة|العاديات|القارعة|التكاثر|العصر|الهمزة|الفيل|قريش|الماعون|الكوثر|الكافرون|النصر|المسد|الإخلاص|الفلق|الناس'.split('|'),QV=[7,286,200,176,120,165,206,75,129,109,123,111,43,52,99,128,111,110,98,135,112,78,118,64,77,227,93,88,69,60,34,30,73,54,45,83,182,88,75,85,54,53,89,59,37,35,38,29,18,45,60,49,62,55,78,96,29,22,24,13,14,11,11,18,12,12,30,52,52,44,28,28,20,56,40,31,50,40,46,42,29,19,36,25,22,17,19,26,30,20,15,21,11,8,8,19,5,8,8,11,11,8,3,9,5,4,7,3,6,3,5,4,5,6];
+let qi=0,qb=null,qL=null,sv2=null;const sv=k=>{clearTimeout(sv2);sv2=setTimeout(()=>savePush(k),500)};
+function qLayout(){if(qL)return qL;const p=$('qh');let best=[];
+  try{for(let c=30;c>=12;c--){const L=[];for(let y=22+c/2;y<290;y+=c)for(let x=10+c/2;x<332;x+=c)if(p.isPointInFill(new DOMPoint(x,y)))L.push([x,y,c]);if(L.length>=114){best=L;break}}}catch(e){}
+  best.sort((a,b)=>(Math.round(a[1])-Math.round(b[1]))||(b[0]-a[0]));return qL=best.slice(0,114)}
+function drawQ(){let h='',sel='';qLayout().forEach((c,i)=>{const n=i+1,p=Math.min(1,(qb.q[n]||0)/QV[i]),sz=c[2]-1.5;
+  const g='<g data-i="'+i+'" style="cursor:pointer"><rect x="'+(c[0]-sz/2)+'" y="'+(c[1]-sz/2)+'" width="'+sz+'" height="'+sz+'" rx="3" style="fill:'+(p>0?'rgba(31,58,138,'+(0.15+0.85*p)+')':'#eef1f3')+';stroke:'+(i===qi?'#c0392b':'#8e959e')+';stroke-width:'+(i===qi?2.5:0.8)+'"/><text x="'+c[0]+'" y="'+(c[1]+3)+'" text-anchor="middle" style="font-size:'+Math.max(8,c[2]*0.4)+'px;fill:'+(p>0.55?'#fff':'#222')+';pointer-events:none">'+n+'</text></g>';
+  if(i===qi)sel=g;else h+=g});$('qcells').innerHTML=h+sel;
+  let t=0,d=0;QV.forEach((v,i)=>{t+=Math.min(v,qb.q[i+1]||0);if((qb.q[i+1]||0)>=v)d++});
+  $('qtot').textContent=d+' of 114 surahs complete · '+t+' of 6236 verses ('+Math.round(100*t/6236)+'%)'}
+function infoQ(){const v=qb.q[qi+1]||0;$('qn').textContent=(qi+1)+'. '+QN[qi];$('qs').value=qi;const r=$('qr');r.max=QV[qi];r.value=v;readQ()}
+function readQ(){const v=qb.q[qi+1]||0;$('qv2').textContent='Verses memorized: '+v+' / '+QV[qi]+' ('+Math.round(100*v/QV[qi])+'%)'}
+async function showQ(){qb=await getBoard('quran');
+  if(!$('qs').options.length)QN.forEach((n,i)=>{const o=mk('option');o.value=i;o.textContent=(i+1)+'. '+n;$('qs').append(o)});
+  drawQ();infoQ()}
+const BSH=[{sh:'<rect x="30" y="20" width="130" height="190"',x:95,y:112,cl:1},{sh:'<rect x="160" y="20" width="90" height="85"',x:205,y:66,cl:1},{sh:'<rect x="160" y="105" width="90" height="105"',x:205,y:158,cl:1},{sh:'<rect x="250" y="20" width="60" height="190"',x:279,y:100,cl:1},{sh:'<ellipse cx="238" cy="196" rx="44" ry="22"',x:238,y:196,cl:0},{sh:'<path d="M180 178 C178 205 186 228 198 240 L218 236 C210 218 208 196 208 178 Z"',x:194,y:222,cl:0}];
+const BD=[['Python',['Variables','Loops','Functions','Classes']],['JavaScript',['DOM','Async','Arrays','Modules']],['Databases',['SQL basics','Joins','Indexes']],['HTML and CSS',['Tags','Flexbox','Grid','Animations']],['Git',['Commit','Branch','Merge']],['Shell',['Navigation','Files','Scripts']]];
+let ci=0,brb=null;const avgC=a=>a.s.length?a.s.reduce((x,y)=>x+y.p,0)/a.s.length:0;
+function drawC(){let l='',x='',t='';brb.br.forEach((a,i)=>{const p=avgC(a)/100,o=BSH[i],st='style="fill:'+(p>0?'rgba(31,58,138,'+(0.15+0.7*p)+')':'#eef1f3')+';stroke:'+(i===ci?'#c0392b':'#8e959e')+';stroke-width:'+(i===ci?3:1)+';cursor:pointer" data-i="'+i+'"';
+  if(o.cl)l+=o.sh+' '+st+'/>';else x+=o.sh+' '+st+'/>';
+  const w=a.n.split(' '),two=w.length>1&&a.n.length>9,f='text-anchor="middle" style="font-size:12px;fill:'+(p>0.55?'#fff':'#222')+';pointer-events:none"';
+  t+='<text x="'+o.x+'" y="'+o.y+'" '+f+'>'+esc(two?w[0]:a.n)+'</text>'+(two?'<text x="'+o.x+'" y="'+(o.y+14)+'" '+f+'>'+esc(w.slice(1).join(' '))+'</text>':'')});
+  $('lobes').innerHTML=l+'<path d="M50 95 q20 -28 45 0 t45 0 M175 70 q18 -22 40 0 M60 150 q22 22 46 0 t40 0 M180 128 q20 20 40 0" style="fill:none;stroke:#b8bec6;stroke-width:1;pointer-events:none"/>';$('extra').innerHTML=x;$('blab').innerHTML=t}
+const esc=s=>s.replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function infoC(){const a=brb.br[ci],P=$('bp');P.innerHTML='';
+  const hd=mk('div'),nm=mk('input'),tt=mk('span');hd.style.cssText='display:flex;gap:8px;align-items:baseline;margin:6px 0';nm.value=a.n;nm.setAttribute('aria-label','Area name');nm.style.cssText='flex:1;font:700 24px Caveat,cursive;color:#c0392b;border:0;border-bottom:1px dashed #c0392b;background:transparent';
+  tt.style.cssText='font-size:13px;color:#445';const upd=()=>tt.textContent=Math.round(avgC(a))+'% overall';upd();
+  nm.oninput=()=>{a.n=nm.value;sv('brain');drawC()};hd.append(nm,tt);P.append(hd);
+  a.s.forEach((s,j)=>{const r=mk('div'),n=mk('input'),sl=mk('input'),v=mk('span'),x=mk('button');r.style.cssText='display:flex;align-items:center;gap:6px;margin:5px 0';
+    n.value=s.t;n.setAttribute('aria-label','Sub-topic');n.style.cssText='width:96px;font:600 14px Nunito,sans-serif;border:0;border-bottom:1px solid #c5ccd3;background:transparent;color:#222';n.oninput=()=>{s.t=n.value;sv('brain')};
+    sl.type='range';sl.min=0;sl.max=100;sl.step=5;sl.value=s.p;sl.style.flex='1';sl.setAttribute('aria-label',s.t+' progress');v.style.cssText='font-size:13px;width:36px;text-align:right';v.textContent=s.p+'%';
+    sl.oninput=()=>{s.p=+sl.value;v.textContent=s.p+'%';upd();sv('brain');drawC()};
+    x.className='ib';x.textContent='✕';x.setAttribute('aria-label','Delete sub-topic');x.onclick=()=>{a.s.splice(j,1);savePush('brain');drawC();infoC()};r.append(n,sl,v,x);P.append(r)});
+  const ad=mk('input');ad.placeholder='Add a sub-topic…';ad.setAttribute('aria-label','New sub-topic');ad.style.cssText='width:100%;font:600 14px Nunito,sans-serif;padding:5px;border:1px solid #c5ccd3;border-radius:6px;margin-top:4px';
+  ad.onkeydown=e=>{const t=ad.value.trim();if(e.key==='Enter'&&t){a.s.push({t,p:0});savePush('brain');drawC();infoC()}};P.append(ad)}
+async function showC(){brb=await getBoard('brain');
+  if(brb.br.length<6){brb.br=BD.map((a,i)=>({id:'a'+i,n:a[0],s:a[1].map(t=>({t,p:0}))}));savePush('brain')}
+  drawC();infoC()}
 function render(){
   const c=cur(),ul=$('list'),note=$('note'),big=P==='w'||P==='m';
   $('title').textContent=label();applyModel(c);
@@ -290,13 +349,13 @@ async function carryOver(k){
     if(items.length&&!cur().i.length)cache[k].i=items;break}}
 }
 async function load(){
-  if(P==='s')return showStats();
+  if(P==='s')return showStats();if(P==='q')return showQ();if(P==='c')return showC();
   const k=key();render();if(!uid)return;
   const {data,error}=await sb.from('boards').select('data').eq('key',k).maybeSingle();
   if(error){say('Offline. Showing saved copy');widget();return}
   if(data&&!dirty.includes(k)){cache[k]=norm(data.data);ls('wb-'+uid+'-'+k,cache[k])}
   else if(!data&&!ls('wb-'+uid+'-'+k)&&carry&&off>=0)await carryOver(k);
-  await hydrate(k);await genRepeats(k);say('Synced across your devices');if(k===key())render();widget();
+  await hydrate(k);await genRepeats(k);await genSched(k);say('Synced across your devices');if(k===key())render();widget();
 }
 async function showStats(){
   $('main').hidden=true;$('stats').hidden=false;$('title').textContent='Statistics';
@@ -309,10 +368,12 @@ async function showStats(){
     if(p==='d'){days[k.slice(2)]=[c,it.length];wd[new Date(k.slice(2)+'T12:00:00').getDay()]+=c}});
   const ds=o=>keyOf('d',o).slice(2),pc=a=>a.t?Math.round(100*a.c/a.t)+'%':'—';
   let st=0,o=days[ds(0)]&&days[ds(0)][0]>0?0:-1;while(days[ds(o)]&&days[ds(o)][0]>0){st++;o--}
+  const fmt=m=>Math.floor(m/60)+'h '+pad(m%60)+'m',mon0=base('w',0);let dm=0,pm=0;for(let i=0;i<7;i++){const x=new Date(mon0);x.setDate(mon0.getDate()+i);const b=all[dk(x)];if(b)b.tb.forEach(y=>{if(y.d)dm+=mins(y.e)-mins(y.s)})}
+  if(all.sched)all.sched.tb.forEach(t=>pm+=(mins(t.e)-mins(t.s))*t.days.length);
   const N=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'],mx=Math.max(...wd);
   let max=1;const cols=[];for(let i=6;i>=0;i--){const v=days[ds(-i)]||[0,0];max=Math.max(max,v[1]);cols.push([v,base('d',-i).toLocaleDateString(undefined,{weekday:'short'})])}
   const bars=cols.map(([v,n])=>'<div class="col">'+v[0]+'/'+v[1]+'<div class="bar" style="height:'+Math.max(6,Math.round(v[1]/max*70))+'px"><i style="height:'+(v[1]?Math.round(100*v[0]/v[1]):0)+'%"></i></div>'+n+'</div>').join('');
-  $('stats').innerHTML='<h2>Last 7 days (done / total)</h2><div class="bars">'+bars+'</div><div class="g"><div class="s"><b>'+st+'</b>day streak</div><div class="s"><b>'+C+'/'+T+'</b>items done</div><div class="s"><b>'+pc(by.d)+'</b>days</div><div class="s"><b>'+pc(by.w)+'</b>weeks</div><div class="s"><b>'+pc(by.m)+'</b>months</div><div class="s"><b>'+(mx?N[wd.indexOf(mx)].slice(0,3):'—')+'</b>best day</div></div>';
+  $('stats').innerHTML='<h2>Last 7 days (done / total)</h2><div class="bars">'+bars+'</div><div class="g"><div class="s"><b>'+st+'</b>day streak</div><div class="s"><b>'+C+'/'+T+'</b>items done</div><div class="s"><b>'+pc(by.d)+'</b>days</div><div class="s"><b>'+pc(by.w)+'</b>weeks</div><div class="s"><b>'+pc(by.m)+'</b>months</div><div class="s"><b>'+(mx?N[wd.indexOf(mx)].slice(0,3):'—')+'</b>best day</div><div class="s" style="grid-column:1/3"><b>'+fmt(dm)+(pm?' / '+fmt(pm):'')+'</b>study time this week</div></div>';
 }
 function live(){
   if(chan)sb.removeChannel(chan);
@@ -321,7 +382,7 @@ function live(){
     cache[r.key]=norm(r.data);ls('wb-'+uid+'-'+r.key,cache[r.key]);
     if(r.key===key()&&P!=='s')render();else if(P==='w'&&r.key[0]==='d'&&cur().m==='plan')renderPlan();widget()}).subscribe();
 }
-const go=()=>{$('main').hidden=false;$('stats').hidden=true;load()};
+const go=()=>{const v=P==='s'||P==='q'||P==='c';$('main').hidden=v;$('stats').hidden=P!=='s';$('qv').hidden=P!=='q';$('cv').hidden=P!=='c';load()};
 $('note').addEventListener('input',e=>{cur().n=e.target.value;clearTimeout(timer);timer=setTimeout(persist,600)});
 function add(){const t=$('new').value.trim();if(!t)return;cur().i.push({id:uid8(),t,d:false,s:[]});$('new').value='';persist();render();$('new').focus()}
 $('addBtn').onclick=add;
@@ -330,6 +391,16 @@ $('prev').onclick=()=>{off--;go()};$('next').onclick=()=>{off++;go()};$('title')
 document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{P=b.dataset.p;off=0;document.querySelectorAll('#tabs button').forEach(o=>o.setAttribute('aria-selected',o===b));$('prev').style.visibility=$('next').style.visibility=P==='s'?'hidden':'visible';go()});
 $('model').onchange=e=>{cur().m=e.target.value;persist();render()};
 $('tbtn').onclick=()=>{const s=$('ts').value,e=$('te').value,t=$('tt').value.trim();if(!t||!s||!e||mins(e)<=mins(s)){$('terr').textContent=!t?'Enter a title':'End must be after start';return}$('terr').textContent='';const c=cur();c.tb=c.tb||[];c.tb.push({id:uid8(),s,e,t,c:+$('tc').value,d:false});$('tt').value='';persist();render()};
+$('qsvg').addEventListener('click',e=>{const g=e.target.closest('g[data-i]');if(g){qi=+g.getAttribute('data-i');drawQ();infoQ()}});
+$('qs').onchange=e=>{qi=+e.target.value;drawQ();infoQ()};
+$('qr').oninput=e=>{qb.q[qi+1]=+e.target.value;readQ();drawQ();sv('quran')};
+$('bsvg').addEventListener('click',e=>{const g=e.target.closest('[data-i]');if(g){ci=+g.getAttribute('data-i');drawC();infoC()}});
+$('sbtn').onclick=async()=>{const days=[...document.querySelectorAll('#sdd input')].map((c,i)=>c.checked?i:-1).filter(i=>i>=0),s=$('ss').value,e=$('se').value,t=$('st').value.trim();
+  if(!t||!days.length||!s||!e||mins(e)<=mins(s)){$('serr').textContent=!t?'Enter a title':!days.length?'Choose at least one day':'End must be after start';return}
+  $('serr').textContent='';const sc=await getBoard('sched'),o={s,e,t,c:+$('sc2').value,n:$('sn').value.trim(),days};
+  if(sed){Object.assign(sc.tb.find(x=>x.id===sed)||{},o)}else sc.tb.push({id:uid8(),...o});
+  sed=null;$('sbtn').textContent='Add to weekly schedule';$('st').value='';$('sn').value='';savePush('sched');await genSched(key());render()};
+$('seed').onclick=async()=>{const sc=await getBoard('sched');SEED().forEach(o=>sc.tb.push({id:uid8(),...o}));savePush('sched');await genSched(key());render()};
 $('carry').checked=carry;$('carry').onchange=e=>{carry=e.target.checked;ls('wb-carry',carry)};
 async function authGo(fn){$('err').textContent='';
   const {data,error}=await fn({email:$('em').value.trim(),password:$('pw').value});
