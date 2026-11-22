@@ -68,6 +68,19 @@ li{display:block}.row{display:flex;align-items:center;gap:6px;min-height:32px}
 .wd{display:flex;gap:2px;flex-wrap:wrap}.wd button{border:0;background:none;font-size:18px;padding:2px;cursor:pointer;opacity:.25}.wd button.on{opacity:1}
 .tabs{gap:4px}.tabs button{font-size:13px;padding:9px 2px}
 .tf label{display:flex;align-items:center;gap:3px;font-size:13px;color:#445}.tf label input{min-width:0;flex:none}
+[hidden]{display:none!important}
+.tabs{overflow-x:auto}.tabs button{flex:1 0 auto;padding:9px 12px}
+.dp{position:relative;display:grid;grid-template-columns:1fr 1fr;grid-template-areas:"u g" "u t" "a t" "n n";gap:10px;padding:4px 0}
+.dp h1{grid-column:1/3;font:700 38px Caveat,cursive;text-align:center;margin:0;color:#222}.dp .dd{grid-column:1/3;text-align:center;font:600 14px Nunito,sans-serif;color:#445}
+.pb{border-radius:14px;padding:6px 10px 10px;position:relative;min-height:70px}.pb h3{font:700 19px Caveat,cursive;text-align:center;margin:0 0 2px;color:#222}
+.pb .row{min-height:26px}.pb .tx{font:500 18px Caveat,cursive;flex:1;color:#222}.pb .done .tx{text-decoration:line-through;opacity:.6}
+.pb input.ai{width:100%;border:0;border-bottom:1px dashed #555;background:transparent;font:500 17px Caveat,cursive;color:#222}.pb textarea{min-height:70px;font:500 19px/26px Caveat,cursive;color:#222}
+.dc{position:absolute;pointer-events:none}
+.jc{border:1.5px solid var(--frame2);border-radius:10px;background:#fff;margin:8px 0;padding:8px 10px;color:#222}
+.pbar{height:8px;background:#e3e8ec;border-radius:4px;flex:1;min-width:50px}.pbar i{display:block;height:100%;background:var(--ink);border-radius:4px}
+.jd{font:600 13px Nunito,sans-serif;border:1px solid #c5ccd3;border-radius:6px;padding:3px;background:#fff;color:#222}
+.jt{font:600 15px Nunito,sans-serif;border:0;border-bottom:1px solid #c5ccd3;background:transparent;color:#222;flex:1;min-width:0}
+.jm{margin:8px 0 0 2px;padding-left:8px;border-left:3px solid var(--ink)}
 </style>
 </head>
 <body>
@@ -86,6 +99,7 @@ li{display:block}.row{display:flex;align-items:center;gap:6px;min-height:32px}
     <button role="tab" data-p="m" aria-selected="false">Month</button>
     <button role="tab" data-p="q" aria-selected="false">Quran</button>
     <button role="tab" data-p="c" aria-selected="false">Code</button>
+    <button role="tab" data-p="j" aria-selected="false">Plan</button>
     <button role="tab" data-p="s" aria-selected="false">Stats</button>
   </div>
   <div class="frame"><div class="board"><div id="main">
@@ -98,7 +112,7 @@ li{display:block}.row{display:flex;align-items:center;gap:6px;min-height:32px}
     <textarea id="note" placeholder="Write here…" aria-label="Notes"></textarea>
     <h2>List</h2>
     <ul id="list"></ul>
-    <div class="add"><input id="new" placeholder="Add an item" aria-label="New list item"><button id="addBtn">Add</button></div></div><div id="tv" hidden><details id="sdet" style="margin:6px 0"><summary style="font:700 15px Nunito,sans-serif;cursor:pointer">Weekly schedule (repeats every week)</summary><div id="sdd" class="tf"><label><input type="checkbox">Sun</label><label><input type="checkbox">Mon</label><label><input type="checkbox">Tue</label><label><input type="checkbox">Wed</label><label><input type="checkbox">Thu</label><label><input type="checkbox">Fri</label><label><input type="checkbox">Sat</label></div><div class="tf"><input type="time" id="ss" value="08:00" aria-label="Start"><input type="time" id="se" value="09:00" aria-label="End"><input id="st" placeholder="Session title" aria-label="Session title"><select id="sc2" aria-label="Color"><option value="0">Blue</option><option value="1">Green</option><option value="2">Amber</option><option value="3">Coral</option><option value="4">Purple</option><option value="5">Gray</option></select><input id="sn" placeholder="Note (optional)" aria-label="Note" style="flex:1;min-width:140px"><button id="sbtn">Add to weekly schedule</button></div><div id="serr" style="color:var(--red);font-size:13px"></div><div id="sl"></div><button id="seed" class="ib" hidden>Load my school schedule (example)</button></details><div class="tf"><input type="time" id="ts" value="08:00" aria-label="Start"><input type="time" id="te" value="09:00" aria-label="End"><input id="tt" placeholder="Block title" aria-label="Block title"><select id="tc" aria-label="Color"><option value="0">Blue</option><option value="1">Green</option><option value="2">Amber</option><option value="3">Coral</option><option value="4">Purple</option><option value="5">Gray</option></select><button id="tbtn">Add</button></div><div id="terr" style="color:var(--red);font-size:13px"></div><div id="tl"></div></div><div id="pv" hidden></div></div><div id="stats" hidden></div><div id="qv" hidden><h2>Quran heart</h2><select id="qs" aria-label="Surah" style="width:100%;font:600 15px Nunito,sans-serif;padding:6px;border:1px solid #c5ccd3;border-radius:8px;background:#fff;color:#222"></select><svg id="qsvg" viewBox="0 0 340 300" width="100%" role="img"><title>Heart made of 114 surahs</title><defs><clipPath id="qc"><path id="qh" d="M170 282 C45 195 12 120 45 68 C78 20 142 30 170 80 C198 30 262 20 295 68 C328 120 295 195 170 282 Z"/></clipPath></defs><g id="qcells" clip-path="url(#qc)"></g><path d="M170 282 C45 195 12 120 45 68 C78 20 142 30 170 80 C198 30 262 20 295 68 C328 120 295 195 170 282 Z" style="fill:none;stroke:#222;stroke-width:2"/></svg><div id="qp"><div style="display:flex;justify-content:space-between;align-items:baseline"><span id="qn" style="font:700 26px Caveat,cursive;color:var(--red)"></span><span id="qt" style="font-size:13px;color:#445"></span></div><input type="range" id="qr" min="0" step="1" style="width:100%" aria-label="Verses memorized"><div id="qv2" style="font-size:14px"></div><div id="qtot" style="font-size:13px;color:#445;margin-top:6px"></div></div></div><div id="cv" hidden><h2>Programming brain</h2><svg id="bsvg" viewBox="0 0 340 250" width="100%" role="img"><title>Brain divided into programming topics</title><defs><clipPath id="bc"><ellipse cx="170" cy="105" rx="132" ry="80"/></clipPath></defs><g id="lobes" clip-path="url(#bc)"></g><ellipse cx="170" cy="105" rx="132" ry="80" style="fill:none;stroke:#222;stroke-width:2"/><g id="extra"></g><g id="blab"></g></svg><div id="bp"></div></div>
+    <div class="add"><input id="new" placeholder="Add an item" aria-label="New list item"><button id="addBtn">Add</button></div></div><div id="tv" hidden><details id="sdet" style="margin:6px 0"><summary style="font:700 15px Nunito,sans-serif;cursor:pointer">Weekly schedule (repeats every week)</summary><div id="sdd" class="tf"><label><input type="checkbox">Sun</label><label><input type="checkbox">Mon</label><label><input type="checkbox">Tue</label><label><input type="checkbox">Wed</label><label><input type="checkbox">Thu</label><label><input type="checkbox">Fri</label><label><input type="checkbox">Sat</label></div><div class="tf"><input type="time" id="ss" value="08:00" aria-label="Start"><input type="time" id="se" value="09:00" aria-label="End"><input id="st" placeholder="Session title" aria-label="Session title"><select id="sc2" aria-label="Color"><option value="0">Blue</option><option value="1">Green</option><option value="2">Amber</option><option value="3">Coral</option><option value="4">Purple</option><option value="5">Gray</option></select><input id="sn" placeholder="Note (optional)" aria-label="Note" style="flex:1;min-width:140px"><button id="sbtn">Add to weekly schedule</button></div><div id="serr" style="color:var(--red);font-size:13px"></div><div id="sl"></div><button id="seed" class="ib" hidden>Load my school schedule (example)</button></details><div class="tf"><input type="time" id="ts" value="08:00" aria-label="Start"><input type="time" id="te" value="09:00" aria-label="End"><input id="tt" placeholder="Block title" aria-label="Block title"><select id="tc" aria-label="Color"><option value="0">Blue</option><option value="1">Green</option><option value="2">Amber</option><option value="3">Coral</option><option value="4">Purple</option><option value="5">Gray</option></select><button id="tbtn">Add</button></div><div id="terr" style="color:var(--red);font-size:13px"></div><div id="tl"></div></div><div id="pv" hidden></div><div id="dv" hidden></div></div><div id="stats" hidden></div><div id="qv" hidden><h2>Quran heart</h2><select id="qs" aria-label="Surah" style="width:100%;font:600 15px Nunito,sans-serif;padding:6px;border:1px solid #c5ccd3;border-radius:8px;background:#fff;color:#222"></select><svg id="qsvg" viewBox="0 0 340 300" width="100%" role="img"><title>Heart made of 114 surahs</title><defs><clipPath id="qc"><path id="qh" d="M170 282 C45 195 12 120 45 68 C78 20 142 30 170 80 C198 30 262 20 295 68 C328 120 295 195 170 282 Z"/></clipPath></defs><g id="qcells" clip-path="url(#qc)"></g><path d="M170 282 C45 195 12 120 45 68 C78 20 142 30 170 80 C198 30 262 20 295 68 C328 120 295 195 170 282 Z" style="fill:none;stroke:#222;stroke-width:2"/></svg><div id="qp"><div style="display:flex;justify-content:space-between;align-items:baseline"><span id="qn" style="font:700 26px Caveat,cursive;color:var(--red)"></span><span id="qt" style="font-size:13px;color:#445"></span></div><input type="range" id="qr" min="0" step="1" style="width:100%" aria-label="Verses memorized"><div id="qv2" style="font-size:14px"></div><div id="qtot" style="font-size:13px;color:#445;margin-top:6px"></div></div></div><div id="jv" hidden><h2>Project plans</h2><div class="tf"><input id="jn" placeholder="New project name" aria-label="New project name" style="flex:1"><button id="jadd">Add project</button></div><div id="jl"></div></div><div id="cv" hidden><h2>Programming brain</h2><svg id="bsvg" viewBox="0 0 340 250" width="100%" role="img"><title>Brain divided into programming topics</title><defs><clipPath id="bc"><ellipse cx="170" cy="105" rx="132" ry="80"/></clipPath></defs><g id="lobes" clip-path="url(#bc)"></g><ellipse cx="170" cy="105" rx="132" ry="80" style="fill:none;stroke:#222;stroke-width:2"/><g id="extra"></g><g id="blab"></g></svg><div id="bp"></div></div>
   </div></div>
   <div class="tray"></div>
   <div class="hint"><span id="status" aria-live="polite"></span><span id="ws"></span> <button class="out" id="out">Sign out</button><br><label class="car"><input type="checkbox" id="carry"> Carry unchecked items to the next day, week or month</label></div>
@@ -124,10 +138,10 @@ function label(){const d=base(P,off);
   if(P==='w'){const e=new Date(d);e.setDate(e.getDate()+6);const f={month:'short',day:'numeric'};return 'Week of '+d.toLocaleDateString(undefined,f)+' – '+e.toLocaleDateString(undefined,f)}
   return d.toLocaleDateString(undefined,{month:'long',year:'numeric'})}
 const uid8=()=>Math.random().toString(36).slice(2,9),mk=t=>document.createElement(t);
-const norm=d=>({q:(d&&d.q)||{},br:Array.isArray(d&&d.br)?d.br:[],sx:Array.isArray(d&&d.sx)?d.sx:[],n:(d&&d.n)||'',m:(d&&d.m)||'list',tb:Array.isArray(d&&d.tb)?d.tb:[],w:(d&&d.w)||0,sc:(d&&d.sc)||{},i:(Array.isArray(d&&d.i)?d.i:[]).map((x,n)=>({...x,id:x.id||'o'+n,s:Array.isArray(x.s)?x.s:[]}))});
+const norm=d=>({pj:Array.isArray(d&&d.pj)?d.pj:[],g:(d&&d.g)||'',q:(d&&d.q)||{},br:Array.isArray(d&&d.br)?d.br:[],sx:Array.isArray(d&&d.sx)?d.sx:[],n:(d&&d.n)||'',m:(d&&d.m)||'list',tb:Array.isArray(d&&d.tb)?d.tb:[],w:(d&&d.w)||0,sc:(d&&d.sc)||{},i:(Array.isArray(d&&d.i)?d.i:[]).map((x,n)=>({...x,id:x.id||'o'+n,s:Array.isArray(x.s)?x.s:[]}))});
 const cur=()=>cache[key()]||(cache[key()]=norm(uid&&ls('wb-'+uid+'-'+key())));
 const say=t=>$('status').textContent=t;
-let PR=null;const ws=t=>{$('ws').textContent=' · v7 '+t};
+let PR=null;const ws=t=>{$('ws').textContent=' · v8 '+t};
 function pref(){if(PR)return PR;const C=window.Capacitor;if(!C)return null;try{PR=(C.Plugins&&C.Plugins.WidgetBridge)||(C.registerPlugin&&C.registerPlugin('WidgetBridge'))}catch(e){ws('bridge error: '+e)}return PR}
 function widget(){if(!uid)return;const p=pref();if(!p){ws('no app bridge (use the APK)');return}
   const k=keyOf('d',0),c=cache[k]||ls('wb-'+uid+'-'+k)||{n:'',i:[]};
@@ -208,16 +222,16 @@ function panelUI(it){if(panel.k==='r')return repUI(it);const d=mk('div');d.class
   const g=mk('button');g.textContent='Add';g.className='ib';
   const run=()=>{const t=inp.value.trim();if(!t)return;if(panel.k==='s')mut(it.id,x=>{x.s.push({t,d:false});x.d=false});else splitAdd(it.id,sel.value,t)};
   g.onclick=run;inp.onkeydown=e=>{if(e.key==='Enter')run()};d.append(inp,g);return d}
-const MODELS={d:[['list','Normal list'],['time','Time blocks']],w:[['list','Normal list'],['plan','Week planner']],m:[['list','Normal list']]};
+const MODELS={d:[['list','Normal list'],['dp','Daily planner'],['time','Time blocks']],w:[['list','Normal list'],['plan','Week planner']],m:[['list','Normal list']]};
 const TC=[['#B5D4F4','#0C447C'],['#C0DD97','#27500A'],['#FAC775','#633806'],['#F5C4B3','#712B13'],['#CECBF6','#3C3489'],['#E4E2DC','#444441']];
 
 const mins=t=>{const p=t.split(':');return +p[0]*60+(+p[1]||0)};
 const dk=x=>'d-'+x.getFullYear()+'-'+pad(x.getMonth()+1)+'-'+pad(x.getDate());
 function applyModel(c){const opts=MODELS[P]||MODELS.m,sel=$('model');let m=c.m||'list';if(!opts.some(o=>o[0]===m))m='list';
   if(sel.dataset.p!==P){sel.innerHTML='';opts.forEach(o=>{const e=mk('option');e.value=o[0];e.textContent=o[1];sel.append(e)});sel.dataset.p=P}
-  sel.value=m;$('mrow').hidden=opts.length<2;$('lv').hidden=m!=='list';$('tv').hidden=m!=='time';$('pv').hidden=m!=='plan';
+  sel.value=m;$('mrow').hidden=opts.length<2;$('lv').hidden=m!=='list';$('tv').hidden=m!=='time';$('dv').hidden=m!=='dp';$('pv').hidden=m!=='plan';
   $('wrap').classList.toggle('wide',m==='plan');
-  if(m==='time'){renderTime(c);renderSched()}if(m==='plan')renderPlan();renderWater(c,m)}
+  if(m==='time'){renderTime(c);renderSched()}if(m==='plan')renderPlan();if(m==='dp')renderDaily(c);renderWater(c,m)}
 function renderWater(c,m){const w=$('wt');if(P!=='d'||m==='plan'){w.hidden=true;return}w.hidden=false;w.innerHTML='';
   for(let i=0;i<8;i++){const b=mk('button');b.textContent='💧';b.className=i<(c.w||0)?'on':'';b.setAttribute('aria-label','Water glass '+(i+1));b.onclick=()=>{c.w=c.w===i+1?i:i+1;persist();render()};w.append(b)}}
 function renderTime(c){c.tb=c.tb||[];const tl=$('tl'),H=44,bs=[...c.tb].sort((a,b)=>mins(a.s)-mins(b.s));
@@ -306,6 +320,62 @@ function infoC(){const a=brb.br[ci],P=$('bp');P.innerHTML='';
 async function showC(){brb=await getBoard('brain');
   if(brb.br.length<6){brb.br=BD.map((a,i)=>({id:'a'+i,n:a[0],s:a[1].map(t=>({t,p:0}))}));savePush('brain')}
   drawC();infoC()}
+let fd=0;
+const SV=(p,st)=>'<svg class="dc" aria-hidden="true" viewBox="0 0 60 40" style="'+st+'">'+p+'</svg>';
+const CLOUD='<path d="M8 34 a8 8 0 0 1 2-15 a11 11 0 0 1 21-3 a10 10 0 0 1 18 6 a7 7 0 0 1-1 12z" fill="#e3eaf7" stroke="#222" stroke-width="1.2"/>';
+const LEAF='<path d="M30 3 C50 14 48 32 30 38 C12 32 10 14 30 3Z" fill="#cfe3c0" stroke="#222" stroke-width="1.2"/><path d="M30 8 V36" stroke="#222"/>';
+const FLOWER='<g stroke="#222" stroke-width="1"><circle cx="30" cy="10" r="8" fill="#fbe3a6"/><circle cx="42" cy="19" r="8" fill="#fbe3a6"/><circle cx="37" cy="32" r="8" fill="#fbe3a6"/><circle cx="23" cy="32" r="8" fill="#fbe3a6"/><circle cx="18" cy="19" r="8" fill="#fbe3a6"/><circle cx="30" cy="22" r="5" fill="#e9b44c"/></g>';
+function renderDaily(c){const dv=$('dv'),a=document.activeElement,force=fd;fd=0;
+  if(!force&&dv.contains(a)&&(a.tagName==='TEXTAREA'||(a.tagName==='INPUT'&&a.type==='text')))return;
+  dv.innerHTML='';const D=mk('div');D.className='dp';
+  D.innerHTML=SV(CLOUD,'left:0;top:2px;width:54px')+SV(LEAF,'right:4px;top:2px;width:34px');
+  const h=mk('h1');h.textContent='Daily planner';const dd=mk('div');dd.className='dd';dd.textContent='Date: '+base('d',off).toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});D.append(h,dd);
+  const box=(ar,nm,bg)=>{const b=mk('div'),t=mk('h3');b.className='pb';b.style.background=bg;b.style.gridArea=ar;t.textContent=nm;b.append(t);D.append(b);return b};
+  const done=()=>{fd=1;persist();render()};
+  [['u','Urgent','#c3d6c4',x=>x.u,{u:1}],['a','Appointment','#ead4d4',x=>x.ap,{ap:1}],['t','Task list','#dae8d9',x=>!x.u&&!x.ap,{}]].forEach(([ar,nm,bg,f,fl])=>{const b=box(ar,nm,bg);
+    c.i.filter(f).forEach(it=>{const r=mk('div'),cb=mk('input'),t=mk('span'),x=mk('button');r.className='row'+(it.d?' done':'');cb.type='checkbox';cb.checked=!!it.d;cb.setAttribute('aria-label','Mark done');
+      cb.onchange=()=>{it.d=cb.checked;(it.s||[]).forEach(y=>y.d=cb.checked);done()};t.className='tx';t.textContent=it.t;x.className='ib';x.textContent='✕';x.setAttribute('aria-label','Delete');x.onclick=()=>{c.i.splice(c.i.indexOf(it),1);done()};r.append(cb,t,x);b.append(r)});
+    const ai=mk('input');ai.className='ai';ai.placeholder='Add…';ai.setAttribute('aria-label','Add to '+nm);ai.onkeydown=e=>{const t=ai.value.trim();if(e.key==='Enter'&&t){c.i.push({id:uid8(),t,d:false,s:[],...fl});done()}};b.append(ai);
+    if(ar==='u')b.insertAdjacentHTML('beforeend',SV(FLOWER,'right:6px;bottom:6px;width:40px;opacity:.9'))});
+  const g=box('g','Goal for today','#f3e3e8'),gi=mk('input');gi.className='ai';gi.placeholder='Today\u2019s goal…';gi.value=c.g||'';gi.setAttribute('aria-label','Goal for today');gi.oninput=()=>{c.g=gi.value;clearTimeout(timer);timer=setTimeout(persist,600)};g.append(gi);
+  const n=box('n','Notes','#aec59d'),ta=mk('textarea');ta.value=c.n||'';ta.setAttribute('aria-label','Notes');ta.oninput=()=>{c.n=ta.value;clearTimeout(timer);timer=setTimeout(persist,600)};n.append(ta);
+  dv.append(D)}
+let jb=null,jo=null;
+const mp=m=>m.s.length?m.s.filter(x=>x.d).length/m.s.length:(m.d?1:0),jp=p=>p.ms.length?p.ms.reduce((a,m)=>a+mp(m),0)/p.ms.length:0;
+async function showJ(){jb=await getBoard('projects');renderJ()}
+function jchg(p,m,was){if(m&&!was&&m.d){const all=p.ms.length>0&&p.ms.every(x=>x.d);celebrate(all?'Project complete! 🎉':'Milestone done: '+m.t+' ✨',all)}savePush('projects');renderJ()}
+async function toToday(t){const k=dk(base('d',0)),b=await getBoard(k);b.i.push({id:uid8(),t,d:false,s:[]});savePush(k);say('Added to today\u2019s task list')}
+function bar(p){const b=mk('div'),i=mk('i');b.className='pbar';i.style.width=Math.round(100*p)+'%';b.append(i);return b}
+function renderJ(){const L=$('jl');L.innerHTML='';if(!jb.pj.length){L.textContent='No projects yet. Add one above.';return}
+  jb.pj.forEach(p=>{const c=mk('div'),hd=mk('div'),tg=mk('button'),nm=mk('span'),pc=mk('span');c.className='jc';hd.className='row';
+    tg.className='ib';tg.textContent=jo===p.id?'▾':'▸';tg.setAttribute('aria-label','Open project');tg.onclick=()=>{jo=jo===p.id?null:p.id;renderJ()};
+    nm.className='tx';nm.style.cssText='flex:1;font:800 16px Nunito,sans-serif;color:#222';nm.textContent=p.n;pc.style.cssText='font-size:13px;color:#445;width:38px;text-align:right';pc.textContent=Math.round(100*jp(p))+'%';
+    hd.append(tg,nm,pc);c.append(hd,bar(jp(p)));
+    if(jo===p.id){const ed=mk('div'),ni=mk('input'),du=mk('input'),dl=mk('button');ed.className='row';ed.style.margin='6px 0';
+      ni.className='jt';ni.value=p.n;ni.setAttribute('aria-label','Project name');ni.oninput=()=>{p.n=ni.value;nm.textContent=p.n;sv('projects')};
+      du.type='date';du.className='jd';du.value=p.due||'';du.setAttribute('aria-label','Project due date');du.onchange=()=>{p.due=du.value;sv('projects')};
+      dl.className='ib';dl.textContent='🗑';dl.setAttribute('aria-label','Delete project');dl.onclick=()=>{if(confirm('Delete this project?')){jb.pj=jb.pj.filter(x=>x!==p);jo=null;savePush('projects');renderJ()}};
+      ed.append(ni,du,dl);c.append(ed);
+      p.ms.forEach(m=>{const mb=mk('div'),mh=mk('div'),dm=mk('span'),mt=mk('input'),md=mk('input'),mx=mk('button');mb.className='jm';mh.className='row';
+        dm.textContent='◆';dm.style.color=m.d?'#2e8b57':'#1f3a8a';
+        mt.className='jt';mt.value=m.t;mt.setAttribute('aria-label','Milestone');mt.oninput=()=>{m.t=mt.value;sv('projects')};
+        md.type='date';md.className='jd';md.value=m.due||'';md.setAttribute('aria-label','Milestone date');md.onchange=()=>{m.due=md.value;sv('projects')};
+        mx.className='ib';mx.textContent='✕';mx.setAttribute('aria-label','Delete milestone');mx.onclick=()=>{p.ms=p.ms.filter(x=>x!==m);savePush('projects');renderJ()};
+        mh.append(dm,mt,md,mx);mb.append(mh);
+        const cnt=mk('div');cnt.style.cssText='display:flex;align-items:center;gap:8px;font-size:12px;color:#445';const tx=mk('span');tx.textContent=m.s.filter(x=>x.d).length+'/'+m.s.length+' steps';cnt.append(bar(mp(m)),tx);
+        if(!m.s.length){const cb=mk('input');cb.type='checkbox';cb.checked=!!m.d;cb.setAttribute('aria-label','Milestone done');cb.onchange=()=>{const was=m.d;m.d=cb.checked;jchg(p,m,was)};cnt.prepend(cb)}
+        mb.append(cnt);
+        m.s.forEach((s,j)=>{const r=mk('div'),cb=mk('input'),t=mk('input'),td=mk('button'),x=mk('button');r.className='row';cb.type='checkbox';cb.checked=!!s.d;cb.setAttribute('aria-label','Step done');
+          cb.onchange=()=>{const was=m.d;s.d=cb.checked;m.d=m.s.every(y=>y.d);jchg(p,m,was)};
+          t.className='jt';t.value=s.t;t.style.textDecoration=s.d?'line-through':'none';t.setAttribute('aria-label','Step');t.oninput=()=>{s.t=t.value;sv('projects')};
+          td.className='ib';td.textContent='📅';td.setAttribute('aria-label','Add to today');td.onclick=()=>toToday(s.t);
+          x.className='ib';x.textContent='✕';x.setAttribute('aria-label','Delete step');x.onclick=()=>{const was=m.d;m.s.splice(j,1);if(m.s.length)m.d=m.s.every(y=>y.d);jchg(p,m,was)};
+          r.append(cb,t,td,x);mb.append(r)});
+        const ai=mk('input');ai.className='jt';ai.placeholder='Add an action step…';ai.style.cssText+='width:100%;flex:none';ai.setAttribute('aria-label','New step');
+        ai.onkeydown=e=>{const t=ai.value.trim();if(e.key==='Enter'&&t){m.s.push({t,d:false});m.d=false;savePush('projects');renderJ()}};mb.append(ai);c.append(mb)});
+      const am=mk('input');am.className='jt';am.placeholder='Add a milestone…';am.style.cssText+='width:100%;flex:none;margin-top:8px;border-bottom:2px solid #1f3a8a';am.setAttribute('aria-label','New milestone');
+      am.onkeydown=e=>{const t=am.value.trim();if(e.key==='Enter'&&t){p.ms.push({id:uid8(),t,due:'',d:false,s:[]});savePush('projects');renderJ()}};c.append(am)}
+    L.append(c)})}
 function render(){
   const c=cur(),ul=$('list'),note=$('note'),big=P==='w'||P==='m';
   $('title').textContent=label();applyModel(c);
@@ -316,7 +386,7 @@ function render(){
     const row=mk('div');row.className='row';
     const cb=mk('input');cb.type='checkbox';cb.checked=!!it.d;cb.setAttribute('aria-label','Mark done');
     cb.onchange=()=>mut(it.id,x=>{x.d=cb.checked;x.s.forEach(y=>y.d=cb.checked)});
-    const s=mk('span');s.className='tx';s.textContent=(it.ap?'📅 ':'')+(it.rid?'🔁 ':'')+(it.r?'↻ ':'')+(it.up?'⤴ ':'')+it.t;
+    const s=mk('span');s.className='tx';s.textContent=(it.u?'⚡ ':'')+(it.ap?'📅 ':'')+(it.rid?'🔁 ':'')+(it.r?'↻ ':'')+(it.up?'⤴ ':'')+it.t;
     row.append(cb,s);
     const pg=prog(it);if(pg){const q=mk('span');q.className='prog';q.textContent=pg;row.append(q)}
     const bt=(txt,lab,fn)=>{const b=mk('button');b.className='ib';b.textContent=txt;b.setAttribute('aria-label',lab);b.onclick=fn;row.append(b)};
@@ -349,7 +419,7 @@ async function carryOver(k){
     if(items.length&&!cur().i.length)cache[k].i=items;break}}
 }
 async function load(){
-  if(P==='s')return showStats();if(P==='q')return showQ();if(P==='c')return showC();
+  if(P==='s')return showStats();if(P==='q')return showQ();if(P==='c')return showC();if(P==='j')return showJ();
   const k=key();render();if(!uid)return;
   const {data,error}=await sb.from('boards').select('data').eq('key',k).maybeSingle();
   if(error){say('Offline. Showing saved copy');widget();return}
@@ -382,7 +452,7 @@ function live(){
     cache[r.key]=norm(r.data);ls('wb-'+uid+'-'+r.key,cache[r.key]);
     if(r.key===key()&&P!=='s')render();else if(P==='w'&&r.key[0]==='d'&&cur().m==='plan')renderPlan();widget()}).subscribe();
 }
-const go=()=>{const v=P==='s'||P==='q'||P==='c';$('main').hidden=v;$('stats').hidden=P!=='s';$('qv').hidden=P!=='q';$('cv').hidden=P!=='c';load()};
+const go=()=>{const v='sqcj'.includes(P);$('main').hidden=v;$('stats').hidden=P!=='s';$('qv').hidden=P!=='q';$('cv').hidden=P!=='c';$('jv').hidden=P!=='j';load()};
 $('note').addEventListener('input',e=>{cur().n=e.target.value;clearTimeout(timer);timer=setTimeout(persist,600)});
 function add(){const t=$('new').value.trim();if(!t)return;cur().i.push({id:uid8(),t,d:false,s:[]});$('new').value='';persist();render();$('new').focus()}
 $('addBtn').onclick=add;
@@ -401,6 +471,8 @@ $('sbtn').onclick=async()=>{const days=[...document.querySelectorAll('#sdd input
   if(sed){Object.assign(sc.tb.find(x=>x.id===sed)||{},o)}else sc.tb.push({id:uid8(),...o});
   sed=null;$('sbtn').textContent='Add to weekly schedule';$('st').value='';$('sn').value='';savePush('sched');await genSched(key());render()};
 $('seed').onclick=async()=>{const sc=await getBoard('sched');SEED().forEach(o=>sc.tb.push({id:uid8(),...o}));savePush('sched');await genSched(key());render()};
+$('jadd').onclick=()=>{const t=$('jn').value.trim();if(!t||!jb)return;const p={id:uid8(),n:t,due:'',ms:[]};jb.pj.push(p);jo=p.id;$('jn').value='';savePush('projects');renderJ()};
+$('jn').onkeydown=e=>{if(e.key==='Enter')$('jadd').onclick()};
 $('carry').checked=carry;$('carry').onchange=e=>{carry=e.target.checked;ls('wb-carry',carry)};
 async function authGo(fn){$('err').textContent='';
   const {data,error}=await fn({email:$('em').value.trim(),password:$('pw').value});
