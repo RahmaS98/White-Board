@@ -141,17 +141,17 @@ const uid8=()=>Math.random().toString(36).slice(2,9),mk=t=>document.createElemen
 const norm=d=>({pj:Array.isArray(d&&d.pj)?d.pj:[],g:(d&&d.g)||'',q:(d&&d.q)||{},br:Array.isArray(d&&d.br)?d.br:[],sx:Array.isArray(d&&d.sx)?d.sx:[],n:(d&&d.n)||'',m:(d&&d.m)||'list',tb:Array.isArray(d&&d.tb)?d.tb:[],w:(d&&d.w)||0,sc:(d&&d.sc)||{},i:(Array.isArray(d&&d.i)?d.i:[]).map((x,n)=>({...x,id:x.id||'o'+n,s:Array.isArray(x.s)?x.s:[]}))});
 const cur=()=>cache[key()]||(cache[key()]=norm(uid&&ls('wb-'+uid+'-'+key())));
 const say=t=>$('status').textContent=t;
-let PR=null;const ws=t=>{$('ws').textContent=' · v8 '+t};
+let PR=null;const ws=t=>{$('ws').textContent=' · v9 '+t};
 function pref(){if(PR)return PR;const C=window.Capacitor;if(!C)return null;try{PR=(C.Plugins&&C.Plugins.WidgetBridge)||(C.registerPlugin&&C.registerPlugin('WidgetBridge'))}catch(e){ws('bridge error: '+e)}return PR}
 function widget(){if(!uid)return;const p=pref();if(!p){ws('no app bridge (use the APK)');return}
   const k=keyOf('d',0),c=cache[k]||ls('wb-'+uid+'-'+k)||{n:'',i:[]};
-  const open=c.i.filter(x=>!x.d),done=c.i.length-open.length;
+  const open=c.i.filter(x=>!x.d&&!x.u),done=c.i.filter(x=>x.d).length,urg=c.i.filter(x=>x.u&&!x.d).slice(0,8).map(x=>'⚡ '+x.t).join('\n');
   let b=open.slice(0,8).map(x=>{const l=(x.s||[]).filter(y=>!y.d).length;return '☐ '+x.t+(l?' ('+l+' left)':'')}).join('\n');
   if(open.length>8)b+='\n+'+(open.length-8)+' more';
   if(done)b+=(b?'\n':'')+'✓ '+done+' done';
   if(c.n)b+=(b?'\n\n':'')+c.n.split('\n')[0].slice(0,80);
   ws('sending to widget…');
-  try{p.setData({title:base('d',0).toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'}),body:b||'Nothing yet. Tap to add.'}).then(()=>ws('widget updated'),e=>ws('widget error: '+((e&&e.message)||e)))}catch(e){ws('widget error: '+e)}}
+  try{p.setData({title:base('d',0).toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'}),body:b||'Nothing yet. Tap to add.',urgent:urg}).then(()=>ws('widget updated'),e=>ws('widget error: '+((e&&e.message)||e)))}catch(e){ws('widget error: '+e)}}
 async function push(k){
   const {error}=await sb.from('boards').upsert({user_id:uid,key:k,data:cache[k]},{onConflict:'user_id,key'});
   if(error){if(!dirty.includes(k))dirty.push(k);ls('wb-dirty-'+uid,dirty);say('Offline. Will sync when connected.')}
