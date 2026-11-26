@@ -141,17 +141,20 @@ const uid8=()=>Math.random().toString(36).slice(2,9),mk=t=>document.createElemen
 const norm=d=>({pj:Array.isArray(d&&d.pj)?d.pj:[],g:(d&&d.g)||'',q:(d&&d.q)||{},br:Array.isArray(d&&d.br)?d.br:[],sx:Array.isArray(d&&d.sx)?d.sx:[],n:(d&&d.n)||'',m:(d&&d.m)||'list',tb:Array.isArray(d&&d.tb)?d.tb:[],w:(d&&d.w)||0,sc:(d&&d.sc)||{},i:(Array.isArray(d&&d.i)?d.i:[]).map((x,n)=>({...x,id:x.id||'o'+n,s:Array.isArray(x.s)?x.s:[]}))});
 const cur=()=>cache[key()]||(cache[key()]=norm(uid&&ls('wb-'+uid+'-'+key())));
 const say=t=>$('status').textContent=t;
-let PR=null;const ws=t=>{$('ws').textContent=' · v9 '+t};
+let PR=null;const ws=t=>{$('ws').textContent=' · v10 '+t};
 function pref(){if(PR)return PR;const C=window.Capacitor;if(!C)return null;try{PR=(C.Plugins&&C.Plugins.WidgetBridge)||(C.registerPlugin&&C.registerPlugin('WidgetBridge'))}catch(e){ws('bridge error: '+e)}return PR}
+let lastW='';
 function widget(){if(!uid)return;const p=pref();if(!p){ws('no app bridge (use the APK)');return}
   const k=keyOf('d',0),c=cache[k]||ls('wb-'+uid+'-'+k)||{n:'',i:[]};
-  const open=c.i.filter(x=>!x.d&&!x.u),done=c.i.filter(x=>x.d).length,urg=c.i.filter(x=>x.u&&!x.d).slice(0,8).map(x=>'⚡ '+x.t).join('\n');
-  let b=open.slice(0,8).map(x=>{const l=(x.s||[]).filter(y=>!y.d).length;return '☐ '+x.t+(l?' ('+l+' left)':'')}).join('\n');
-  if(open.length>8)b+='\n+'+(open.length-8)+' more';
-  if(done)b+=(b?'\n':'')+'✓ '+done+' done';
-  if(c.n)b+=(b?'\n\n':'')+c.n.split('\n')[0].slice(0,80);
-  ws('sending to widget…');
-  try{p.setData({title:base('d',0).toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'}),body:b||'Nothing yet. Tap to add.',urgent:urg}).then(()=>ws('widget updated'),e=>ws('widget error: '+((e&&e.message)||e)))}catch(e){ws('widget error: '+e)}}
+  const open=c.i.filter(x=>!x.d&&!x.u),done=c.i.filter(x=>x.d).length,urg=[];
+  c.i.forEach(x=>{if(x.d)return;if(x.u)urg.push('⚡ '+x.t);(x.s||[]).forEach(y=>{if(y.u&&!y.d)urg.push('⚡ '+x.t+' › '+y.t)})});
+  let b=open.slice(0,5).map(x=>{const l=(x.s||[]).filter(y=>!y.d).length;return '☐ '+x.t+(l?' ('+l+')':'')}).join('\n');
+  if(open.length>5)b+='\n+'+(open.length-5);
+  if(done)b+=(b?'\n':'')+'✓ '+done;
+  if(c.n)b+=(b?'\n':'')+c.n.split('\n')[0].slice(0,50);
+  const pl={title:base('d',0).toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'}),body:b||'Nothing yet.',urgent:urg.slice(0,5).join('\n')},j=JSON.stringify(pl);
+  if(j===lastW)return;lastW=j;ws('sending to widget…');
+  try{p.setData(pl).then(()=>ws('widget updated'),e=>{lastW='';ws('widget error: '+((e&&e.message)||e))})}catch(e){lastW='';ws('widget error: '+e)}}
 async function push(k){
   const {error}=await sb.from('boards').upsert({user_id:uid,key:k,data:cache[k]},{onConflict:'user_id,key'});
   if(error){if(!dirty.includes(k))dirty.push(k);ls('wb-dirty-'+uid,dirty);say('Offline. Will sync when connected.')}
@@ -332,9 +335,9 @@ function renderDaily(c){const dv=$('dv'),a=document.activeElement,force=fd;fd=0;
   const h=mk('h1');h.textContent='Daily planner';const dd=mk('div');dd.className='dd';dd.textContent='Date: '+base('d',off).toLocaleDateString(undefined,{weekday:'long',month:'long',day:'numeric',year:'numeric'});D.append(h,dd);
   const box=(ar,nm,bg)=>{const b=mk('div'),t=mk('h3');b.className='pb';b.style.background=bg;b.style.gridArea=ar;t.textContent=nm;b.append(t);D.append(b);return b};
   const done=()=>{fd=1;persist();render()};
-  [['u','Urgent','#c3d6c4',x=>x.u,{u:1}],['a','Appointment','#ead4d4',x=>x.ap,{ap:1}],['t','Task list','#dae8d9',x=>!x.u&&!x.ap,{}]].forEach(([ar,nm,bg,f,fl])=>{const b=box(ar,nm,bg);
+  [['u','Urgent','#c3d6c4',x=>x.u,{u:1}],['a','Appointment','#ead4d4',x=>x.ap&&!x.u,{ap:1}],['t','Task list','#dae8d9',x=>!x.u&&!x.ap,{}]].forEach(([ar,nm,bg,f,fl])=>{const b=box(ar,nm,bg);
     c.i.filter(f).forEach(it=>{const r=mk('div'),cb=mk('input'),t=mk('span'),x=mk('button');r.className='row'+(it.d?' done':'');cb.type='checkbox';cb.checked=!!it.d;cb.setAttribute('aria-label','Mark done');
-      cb.onchange=()=>{it.d=cb.checked;(it.s||[]).forEach(y=>y.d=cb.checked);done()};t.className='tx';t.textContent=it.t;x.className='ib';x.textContent='✕';x.setAttribute('aria-label','Delete');x.onclick=()=>{c.i.splice(c.i.indexOf(it),1);done()};r.append(cb,t,x);b.append(r)});
+      cb.onchange=()=>{it.d=cb.checked;(it.s||[]).forEach(y=>y.d=cb.checked);done()};t.className='tx';t.textContent=it.t;x.className='ib';x.textContent='✕';x.setAttribute('aria-label','Delete');x.onclick=()=>{c.i.splice(c.i.indexOf(it),1);done()};const ub=mk('button');ub.className='ib';ub.textContent='⚡';ub.style.opacity=it.u?1:.3;ub.setAttribute('aria-label',it.u?'Remove urgent':'Mark urgent');ub.onclick=()=>{it.u=!it.u;done()};r.append(cb,t,ub,x);b.append(r)});
     const ai=mk('input');ai.className='ai';ai.placeholder='Add…';ai.setAttribute('aria-label','Add to '+nm);ai.onkeydown=e=>{const t=ai.value.trim();if(e.key==='Enter'&&t){c.i.push({id:uid8(),t,d:false,s:[],...fl});done()}};b.append(ai);
     if(ar==='u')b.insertAdjacentHTML('beforeend',SV(FLOWER,'right:6px;bottom:6px;width:40px;opacity:.9'))});
   const g=box('g','Goal for today','#f3e3e8'),gi=mk('input');gi.className='ai';gi.placeholder='Today\u2019s goal…';gi.value=c.g||'';gi.setAttribute('aria-label','Goal for today');gi.oninput=()=>{c.g=gi.value;clearTimeout(timer);timer=setTimeout(persist,600)};g.append(gi);
@@ -389,8 +392,9 @@ function render(){
     const s=mk('span');s.className='tx';s.textContent=(it.u?'⚡ ':'')+(it.ap?'📅 ':'')+(it.rid?'🔁 ':'')+(it.r?'↻ ':'')+(it.up?'⤴ ':'')+it.t;
     row.append(cb,s);
     const pg=prog(it);if(pg){const q=mk('span');q.className='prog';q.textContent=pg;row.append(q)}
-    const bt=(txt,lab,fn)=>{const b=mk('button');b.className='ib';b.textContent=txt;b.setAttribute('aria-label',lab);b.onclick=fn;row.append(b)};
+    const bt=(txt,lab,fn)=>{const b=mk('button');b.className='ib';b.textContent=txt;b.setAttribute('aria-label',lab);b.onclick=fn;row.append(b);return b};
     const tog=k=>()=>{panel=panel&&panel.id===it.id&&panel.k===k?null:{id:it.id,k};render()};
+    bt('⚡',it.u?'Remove urgent':'Mark urgent',()=>mut(it.id,x=>{x.u=!x.u})).style.opacity=it.u?1:.3;
     bt('＋','Add sub-item',tog('s'));
     bt('🔁','Repeat',tog('r'));
     if(big)bt('⇲',P==='m'?'Split into weeks':'Split into days',tog('p'));
@@ -400,10 +404,11 @@ function render(){
       it.s.forEach((q,j)=>{const l2=mk('li');if(q.d)l2.className='done';const r2=mk('div');r2.className='row';
         const c2=mk('input');c2.type='checkbox';c2.checked=!!q.d;c2.setAttribute('aria-label','Mark sub-item done');
         c2.onchange=()=>mut(it.id,x=>{x.s[j].d=c2.checked;x.d=x.s.every(y=>y.d)});
-        const t2=mk('span');t2.className='tx';t2.textContent=q.t;
+        const t2=mk('span');t2.className='tx';t2.textContent=(q.u?'⚡ ':'')+q.t;
         const x2=mk('button');x2.className='ib';x2.textContent='✕';x2.setAttribute('aria-label','Delete sub-item');
+        const u2=mk('button');u2.className='ib';u2.textContent='⚡';u2.style.opacity=q.u?1:.3;u2.setAttribute('aria-label',q.u?'Remove urgent':'Mark urgent');u2.onclick=()=>mut(it.id,x=>{x.s[j].u=!x.s[j].u});
         x2.onclick=()=>mut(it.id,x=>{x.s.splice(j,1);if(x.s.length)x.d=x.s.every(y=>y.d)});
-        r2.append(c2,t2,x2);l2.append(r2);su.append(l2)});li.append(su)}
+        r2.append(c2,t2,u2,x2);l2.append(r2);su.append(l2)});li.append(su)}
     if(panel&&panel.id===it.id)li.append(panelUI(it));
     ul.append(li)});
   if(panel){const i=ul.querySelector('.pn input');if(i)i.focus()}
